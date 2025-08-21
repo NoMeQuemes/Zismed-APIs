@@ -1,0 +1,80 @@
+# ===============================
+# Visual Studio / .NET / C#
+# ===============================
+
+# Archivos de usuario de VS
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Carpetas de build
+bin/
+obj/
+[Bb]uild/
+[Ll]og/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+[Bb]in/
+[Oo]bj/
+
+# Publicaciones
+publish/
+out/
+dist/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+*.vspscc
+*.vssscc
+*.cache
+*.pdb
+
+# Archivos de paquetes NuGet
+*.nupkg
+*.snupkg
+*.nuspec
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Configuración de usuario de VS Code
+.vscode/
+
+# Archivos de Resharper / Rider
+_ReSharper*/
+*.DotSettings.user
+.idea/
+
+# Archivos de test
+TestResult*/
+*.coverage
+*.coveragexml
+*.trx
+
+# Archivos de sistema
+[Tt]humbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+
+# ===============================
+# Archivos de configuración sensibles
+# ===============================
+appsettings.json
+appsettings.*.json
+
+# ===============================
+# Otros comunes
+# ===============================
+*.db
+*.mdf
+*.ldf
+*.sqlite
