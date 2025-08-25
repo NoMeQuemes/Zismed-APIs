@@ -1,239 +1,147 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class Prestadores
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-
-    public partial class Prestadores
-    {
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Prestadores()
-        {
-            Anamnesis = new HashSet<Anamnesis>();
-            Derivaciones_Envios = new HashSet<Derivaciones_Envios>();
-            Internaciones = new HashSet<Internaciones>();
-            Internaciones1 = new HashSet<Internaciones>();
-            Movimientos_Internaciones = new HashSet<Movimientos_Internaciones>();
-            Planilla_Turnos = new HashSet<Planilla_Turnos>();
-            PrestadoresServicios = new HashSet<PrestadoresServicios>();
-            PrestadorDias = new HashSet<PrestadorDias>();
-            Servicios = new HashSet<Servicios>();
-            Turnos = new HashSet<Turnos>();
-            ShockRoom_Anamnesis = new HashSet<ShockRoom_Anamnesis>();
-            ShockRoom_Registro = new HashSet<ShockRoom_Registro>();
-            LaboratorioRegistroSol = new HashSet<LaboratorioRegistro>();
-            LaboratorioRegistrosRea = new HashSet<LaboratorioRegistro>();
-            ImagenRegistroSol = new HashSet<ImagenRegistro>();
-            ImagenRegistrosRea = new HashSet<ImagenRegistro>();
-            GuardiaDerivacionExterna = new HashSet<GuardiaDerivacionExterna>();
-            GuardiaDerivacionInterna = new HashSet<GuardiaDerivacionInterna>();
-            GuardiaRegistroIngreso = new HashSet<GuardiaRegistro>();
-            GuardiaRegistroEgreso = new HashSet<GuardiaRegistro>();
-
-            //---
-            Indicaciones_Dieta = new HashSet<Indicaciones_Dieta>();
-            Indicaciones_Kinesiologia = new HashSet<Indicaciones_Kinesiologia>();
-            Indicaciones_ObservacionesGrales = new HashSet<Indicaciones_ObservacionesGrales>();
-            Indicaciones_Posicion = new HashSet<Indicaciones_Posicion>();
-            Indicaciones_VentilacionMecanica = new HashSet<Indicaciones_VentilacionMecanica>();
-
-            MedicacionInfusionContinuaIndica = new HashSet<MedicacionInfusionContinua>();
-            MedicacionInfusionContinuaRetira = new HashSet<MedicacionInfusionContinua>();
-            MedicacionDiscretaIndica = new HashSet<MedicacionDiscreta>();
-            MedicacionDiscretaRetira = new HashSet<MedicacionDiscreta>();
-            //---
-
-            // PrestadoresGuardia = new HashSet<PrestadoresGuardia>();
-
-            MedicacionPaciente = new HashSet<MedicacionPaciente>();
-            MedicacionPaciente1 = new HashSet<MedicacionPaciente>();
-
-            Evolucion = new HashSet<Evolucion>();
-            Epicrisis = new HashSet<Epicrisis>();
+    public int PrestadorId { get; set; }
 
-            CirujiaDetalle = new HashSet<CirujiaDetalle>();
-            PrestadoresEspecialidades = new HashSet<PrestadoresEspecialidades>();
-            Turnos_Quirofano = new HashSet<Turnos_Quirofano>();
+    public string Matricula { get; set; } = null!;
 
-        }
+    public string Nombre { get; set; } = null!;
 
-        [Key]
-        public int PrestadorID { get; set; }
-
-        [Required]
-        [StringLength(10)]
-        public string Matricula { get; set; }
-        [Required]
-        [StringLength(10)]
-        public string Documento { get; set; }
+    public int EspecialidadId { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string Nombre { get; set; }
+    public string? Telefono { get; set; }
 
-        public int EspecialidadID { get; set; }
+    public string? Email { get; set; }
 
-        [StringLength(50)]
-        public string Telefono { get; set; }
+    public bool Anulado { get; set; }
 
-        [StringLength(50)]
-        public string Email { get; set; }
+    public bool? Guardia { get; set; }
 
-        public bool Anulado { get; set; }
+    public bool? Ambulatorio { get; set; }
 
-        public bool? Guardia { get; set; }
+    public bool? Internacion { get; set; }
 
-        public bool? Ambulatorio { get; set; }
+    public bool? TiempoAtencionReal { get; set; }
 
-        public bool? Internacion { get; set; }
+    public int? TipoGuardiaId { get; set; }
 
-        public bool? TiempoAtencionReal { get; set; }
+    public string? UsuarioCarga { get; set; }
 
-        public int? TipoGuardiaID { get; set; }
-        [StringLength(11)]
-        public string UsuarioCarga { get; set; }
-        [StringLength(11)]
-        public string UsuarioMod { get; set; }
-        [StringLength(11)]
-        public string UsuarioBaja { get; set; }
+    public string? UsuarioMod { get; set; }
 
-        public DateTime? UltimaMod { get; set; }
+    public string? UsuarioBaja { get; set; }
 
-        public bool EsPrestadorImagen { get; set; }
+    public DateTime? UltimaMod { get; set; }
 
-        public int? InstitucionID { get; set; }
+    public string? Documento { get; set; }
 
-        public int? UsuarioID { get; set; }
-        public string Usuario { get; set; }
-        public int? PrestadorIDHC { get; set; }
-        public string Cuil { get; set; }
-        public bool? IOSEPddjj { get; set; }
-        public DateTime? Vencimientoddjj { get; set; }
-        public virtual TipoGuardia TipoGuardia { get; set; }
-        public int? idIOSEPddjj { get; set; }
+    public bool? EsPrestadorImagen { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Anamnesis> Anamnesis { get; set; }
+    public string? Usuario { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Derivaciones_Envios> Derivaciones_Envios { get; set; }
+    public int? PrestadorIdhc { get; set; }
 
-        public virtual Especialidades Especialidades { get; set; }
+    public int? UsuarioId { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Internaciones> Internaciones { get; set; }
+    public string? Cuil { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Internaciones> Internaciones1 { get; set; }
+    public int? InstitucionId { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Movimientos_Internaciones> Movimientos_Internaciones { get; set; }
+    public int? PrestadorIdoriginal { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Planilla_Turnos> Planilla_Turnos { get; set; }
+    public bool? Iosepddjj { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PrestadoresServicios> PrestadoresServicios { get; set; }
+    public DateTime? Vencimientoddjj { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Turnos> Turnos { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PrestadorDias> PrestadorDias { get; set; }
+    public bool? OrdenAtencionTurno { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Servicios> Servicios { get; set; }
+    public bool? VinculacionJardin { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Interconsulta> Interconsulta { get; set; }
+    public string? DniJardin { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ShockRoom_Anamnesis> ShockRoom_Anamnesis { get; set; }
+    public int? IdIosepddjj { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ShockRoom_Registro> ShockRoom_Registro { get; set; }
+    public virtual ICollection<Anamnesis> Anamnesis { get; set; } = new List<Anamnesis>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<LaboratorioRegistro> LaboratorioRegistroSol { get; set; }
+    public virtual ICollection<AsistenciaMedicos> AsistenciaMedicos { get; set; } = new List<AsistenciaMedicos>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<LaboratorioRegistro> LaboratorioRegistrosRea { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ImagenRegistro> ImagenRegistroSol { get; set; }
+    public virtual ICollection<CirujiaDetalle> CirujiaDetalle { get; set; } = new List<CirujiaDetalle>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ImagenRegistro> ImagenRegistrosRea { get; set; }
+    public virtual ICollection<Epicrisis> Epicrisis { get; set; } = new List<Epicrisis>();
 
-        //----
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Dieta> Indicaciones_Dieta { get; set; }
+    public virtual Especialidades Especialidad { get; set; } = null!;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Kinesiologia> Indicaciones_Kinesiologia { get; set; }
+    public virtual ICollection<Evolucion> Evolucion { get; set; } = new List<Evolucion>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_ObservacionesGrales> Indicaciones_ObservacionesGrales { get; set; }
+    public virtual ICollection<GuardiaAnamnesis> GuardiaAnamnesis { get; set; } = new List<GuardiaAnamnesis>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Posicion> Indicaciones_Posicion { get; set; }
+    public virtual ICollection<GuardiaDerivacionExterna> GuardiaDerivacionExterna { get; set; } = new List<GuardiaDerivacionExterna>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_VentilacionMecanica> Indicaciones_VentilacionMecanica { get; set; }
+    public virtual ICollection<GuardiaDerivacionInterna> GuardiaDerivacionInterna { get; set; } = new List<GuardiaDerivacionInterna>();
 
+    public virtual ICollection<GuardiaRegistro> GuardiaRegistroPrestadorEgreso { get; set; } = new List<GuardiaRegistro>();
 
-        //----
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionDiscreta> MedicacionDiscretaIndica { get; set; }
+    public virtual ICollection<GuardiaRegistro> GuardiaRegistroPrestadorIngreso { get; set; } = new List<GuardiaRegistro>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionDiscreta> MedicacionDiscretaRetira { get; set; }
+    public virtual ICollection<ImagenRegistro> ImagenRegistroPrestadorRealizaNavigation { get; set; } = new List<ImagenRegistro>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionInfusionContinua> MedicacionInfusionContinuaIndica { get; set; }
+    public virtual ICollection<ImagenRegistro> ImagenRegistroPrestadorSolicitaNavigation { get; set; } = new List<ImagenRegistro>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionInfusionContinua> MedicacionInfusionContinuaRetira { get; set; }
+    public virtual ICollection<IndicacionesDieta> IndicacionesDieta { get; set; } = new List<IndicacionesDieta>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaDerivacionExterna> GuardiaDerivacionExterna { get; set; }
+    public virtual ICollection<IndicacionesKinesiologia> IndicacionesKinesiologia { get; set; } = new List<IndicacionesKinesiologia>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaDerivacionInterna> GuardiaDerivacionInterna { get; set; }
+    public virtual ICollection<IndicacionesObservacionesGrales> IndicacionesObservacionesGrales { get; set; } = new List<IndicacionesObservacionesGrales>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaRegistro> GuardiaRegistroIngreso { get; set; }
+    public virtual ICollection<IndicacionesPosicion> IndicacionesPosicion { get; set; } = new List<IndicacionesPosicion>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaRegistro> GuardiaRegistroEgreso { get; set; }
+    public virtual ICollection<IndicacionesVentilacionMecanica> IndicacionesVentilacionMecanica { get; set; } = new List<IndicacionesVentilacionMecanica>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaAnamnesis> GuardiaAnamnesis { get; set; }
+    public virtual ICollection<Interconsulta> Interconsulta { get; set; } = new List<Interconsulta>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Consultas_Ambulatorias> Consultas_Ambulatorias { get; set; }
+    public virtual ICollection<Internaciones> InternacionesPrestadorAlta { get; set; } = new List<Internaciones>();
 
-        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        //public virtual ICollection<PrestadoresGuardia> PrestadoresGuardia { get; set; }
+    public virtual ICollection<Internaciones> InternacionesPrestadorIngreso { get; set; } = new List<Internaciones>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPaciente> MedicacionPaciente { get; set; }
+    public virtual ICollection<LaboratorioRegistro> LaboratorioRegistroPrestadorRealizaNavigation { get; set; } = new List<LaboratorioRegistro>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPaciente> MedicacionPaciente1 { get; set; }
+    public virtual ICollection<LaboratorioRegistro> LaboratorioRegistroPrestadorSolicitaNavigation { get; set; } = new List<LaboratorioRegistro>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Evolucion> Evolucion { get; set; }
+    public virtual ICollection<MedicacionDiscreta> MedicacionDiscretaPrestadorIdindicaNavigation { get; set; } = new List<MedicacionDiscreta>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Epicrisis> Epicrisis { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CirujiaDetalle> CirujiaDetalle { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PrestadoresEspecialidades> PrestadoresEspecialidades { get; set; }
+    public virtual ICollection<MedicacionDiscreta> MedicacionDiscretaPrestadorIdretiraNavigation { get; set; } = new List<MedicacionDiscreta>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Turnos_Quirofano> Turnos_Quirofano { get; set; }
+    public virtual ICollection<MedicacionInfusionContinua> MedicacionInfusionContinuaPrestadorIdindicaNavigation { get; set; } = new List<MedicacionInfusionContinua>();
 
-    }
+    public virtual ICollection<MedicacionInfusionContinua> MedicacionInfusionContinuaPrestadorIdretiraNavigation { get; set; } = new List<MedicacionInfusionContinua>();
+
+    public virtual ICollection<MedicacionPaciente> MedicacionPacientePrestadorPrescribe { get; set; } = new List<MedicacionPaciente>();
+
+    public virtual ICollection<MedicacionPaciente> MedicacionPacientePrestadorRetira { get; set; } = new List<MedicacionPaciente>();
+
+    public virtual ICollection<MovimientosInternaciones> MovimientosInternaciones { get; set; } = new List<MovimientosInternaciones>();
+
+    public virtual ICollection<PlanillaControl> PlanillaControl { get; set; } = new List<PlanillaControl>();
+
+    public virtual ICollection<PlanillaTurnos> PlanillaTurnos { get; set; } = new List<PlanillaTurnos>();
+
+    public virtual ICollection<Prescripcion> Prescripcion { get; set; } = new List<Prescripcion>();
+
+    public virtual ICollection<PrestadorDias> PrestadorDias { get; set; } = new List<PrestadorDias>();
+
+    public virtual ICollection<PrestadoresServicios> PrestadoresServicios { get; set; } = new List<PrestadoresServicios>();
+
+    public virtual ICollection<ShockRoomAnamnesis> ShockRoomAnamnesis { get; set; } = new List<ShockRoomAnamnesis>();
+
+    public virtual ICollection<ShockRoomRegistro> ShockRoomRegistro { get; set; } = new List<ShockRoomRegistro>();
+
+    public virtual TipoGuardia? TipoGuardia { get; set; }
+
+    public virtual ICollection<Turnos> Turnos { get; set; } = new List<Turnos>();
+
+    public virtual ICollection<TurnosQuirofano> TurnosQuirofano { get; set; } = new List<TurnosQuirofano>();
 }

@@ -1,5 +1,8 @@
-﻿namespace Zismed_Apis.Models.Dto
+﻿using Microsoft.EntityFrameworkCore;
+
+namespace Zismed_Apis.Models.Dto
 {
+    [Keyless]
     public class PacienteGuardiaDto
     {
         //public int GuardiaRegistroID { get; set; }

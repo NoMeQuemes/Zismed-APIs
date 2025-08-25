@@ -1,257 +1,183 @@
-namespace WebHospital.Models
+ï»¿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class Pacientes
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
-    using Futronic.SDKHelper;
+    public int PacienteId { get; set; }
 
-    public partial class Pacientes
-    {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Pacientes()
-        {
-            Anamnesis = new HashSet<Anamnesis>();
-            Consultas_Ambulatorias = new HashSet<Consultas_Ambulatorias>();
-            Derivaciones_Envios = new HashSet<Derivaciones_Envios>();
-            Internaciones = new HashSet<Internaciones>();
-            Turnos = new HashSet<Turnos>();
-            Numerador_HC = new HashSet<Numerador_HC>();
-            ShockRoom_Anamnesis = new HashSet<ShockRoom_Anamnesis>();
-            ShockRoom_Registro = new HashSet<ShockRoom_Registro>();
-            GuardiaRegistro = new HashSet<GuardiaRegistro>();
+    public string? Cuil { get; set; }
 
-            //---
-            Indicaciones_Dieta = new HashSet<Indicaciones_Dieta>();
-            Indicaciones_Kinesiologia = new HashSet<Indicaciones_Kinesiologia>();
-            Indicaciones_ObservacionesGrales = new HashSet<Indicaciones_ObservacionesGrales>();
-            Indicaciones_Posicion = new HashSet<Indicaciones_Posicion>();
-            Indicaciones_VentilacionMecanica = new HashSet<Indicaciones_VentilacionMecanica>();
+    public int IdTipoDocumento { get; set; }
 
-            OrientacionObstetrica = new HashSet<OrientacionObstetrica>();
+    public string Documento { get; set; } = null!;
 
-            MedicacionPaciente = new HashSet<MedicacionPaciente>();
+    public string Nombre { get; set; } = null!;
 
-            FarmaciaEgreso = new HashSet<FarmaciaEgreso>();
+    public string? Apellido { get; set; }
 
-            Vacunas_Pacientes = new HashSet<Vacunas_Pacientes>();
+    public int? ObraSocialId { get; set; }
 
-            PrescripcionEncabezado = new HashSet<PrescripcionEncabezado>();
+    public int? IdNacionalidad { get; set; }
 
-            PacienteEstado = new HashSet<PacienteEstado>();
+    public byte? IdSexo { get; set; }
 
-            Turnos_Quirofano = new HashSet<Turnos_Quirofano>();
+    public byte? IdSexoGenero { get; set; }
 
+    public int? IdEstadoCivil { get; set; }
 
-        }
+    public DateOnly? FechadeNacimiento { get; set; }
 
-        [Key]
-        [UIHint("Pacientes")]
-        public int PacienteID { get; set; }
+    public int? IdTipoDocReferencia { get; set; }
 
-        [StringLength(11)]
-        public string Cuil { get; set; }
+    public string? DocReferencia { get; set; }
 
-        [Display(Name = "Tipo Documento")]
-        public int IdTipoDocumento { get; set; }
+    public string? ResidenciaLocalidad { get; set; }
 
-        [Required]
-        [StringLength(50)]
-        public string Documento { get; set; }
+    public string? Barrio { get; set; }
 
-        [Required]
-        [StringLength(100)]
-        public string Nombre { get; set; }
+    public string? Localidad { get; set; }
 
-        [StringLength(50)]
-        public string Apellido { get; set; }
+    public int? TipoInstruccionId { get; set; }
 
-        [Display(Name = "Obra Social")]
-        public int? ObraSocialID { get; set; }
+    public int? TipoLaboralId { get; set; }
 
-        [Display(Name = "Nacionalidad")]
-        public int? IdNacionalidad { get; set; }
+    public bool? ConDatodeMadre { get; set; }
 
-        [Display(Name = "Sexo")]
-        public byte? IdSexo { get; set; }
+    public bool Anulado { get; set; }
 
-        [Display(Name = "Genero")]
-        public byte? IdSexoGenero { get; set; }
+    public DateTime? FechaCarga { get; set; }
 
-        [Display(Name = "Estado Civil")]
-        public int IdEstadoCivil { get; set; }
+    public string? Telefono { get; set; }
 
-        [Column(TypeName = "date")]
-        [DataType(DataType.Date)]
-        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
-        [Display(Name = "Fecha de Nac.")]
-        public DateTime? FechadeNacimiento { get; set; }
+    public string? RnnroFicha { get; set; }
 
-        [Display(Name = "Tipo Doc. Ref.")]
-        public int? IdTipo_DocReferencia { get; set; }
+    public int? PacienteIdref { get; set; }
 
-        [StringLength(10)]
-        [Display(Name = "Doc. Ref.")]
-        public string Doc_Referencia { get; set; }
+    public string? UsuarioCarga { get; set; }
 
-        [StringLength(100)]
-        [Display(Name = "Residencia")]
-        public string Residencia_Localidad { get; set; }
+    public bool Unificado { get; set; }
 
-        [Display(Name = "Instrucción")]
-        public int? TipoInstruccionID { get; set; }
+    public int? IdLocalidad { get; set; }
 
-        [Display(Name = "Laboral")]
-        public int? TipoLaboralID { get; set; }
+    public string? UsuarioMod { get; set; }
 
-        [Display(Name = "Hijo")]
-        public bool? ConDatodeMadre { get; set; }
-        public string Barrio { get; set; }
+    public DateTime? UltimaMod { get; set; }
 
-        [StringLength(20)]
-        public string Telefono { get; set; }
+    public string? NroAfiliado { get; set; }
 
-        [StringLength(20)]
-        public string RNNroFicha { get; set; }
+    public int? TipoBeneficiarioId { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioCarga { get; set; }
+    public int? TipoParentezcoId { get; set; }
 
-        public DateTime? FechaCarga { get; set; }
+    public string? FotoDniFrente { get; set; }
 
-        public DateTime? FechaConsulPuco { get; set; }
+    public string? FotoDniDorso { get; set; }
 
-        public bool ConsultaPuco { get; set; }
+    public DateTime? FechaConsulPuco { get; set; }
 
-        public int? PacienteIDRef { get; set; }
+    public bool? ConsultaPuco { get; set; }
 
-        public bool Anulado { get; set; }
+    public bool? RecienNacidoHospital { get; set; }
 
-        public bool Unificado { get; set; }
+    public int? PacienteIdhc { get; set; }
 
-        [Display(Name = "Localidad")]
-        public int? IdLocalidad { get; set; }
+    public int? PacienteIdoriginal { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioMod { get; set; }
+    public bool? Covid19 { get; set; }
 
-        public DateTime? UltimaMod { get; set; }
+    public int? CprovinciaId { get; set; }
 
-        public string NroAfiliado { get; set; }
+    public int? CdepartamentoId { get; set; }
 
-        public int? TipoParentezcoID { get; set; }
+    public int? ClocalidadId { get; set; }
 
-        public int? TipoBeneficiarioID { get; set; }
+    public string? Correo { get; set; }
 
-        public string FotoDniFrente { get; set; }
+    public int? ProfesionId { get; set; }
 
-        public string FotoDniDorso { get; set; }
+    public bool? Considerar { get; set; }
 
-        public bool? RecienNacidoHospital { get; set; }
-        public int? PacienteIDHC { get; set; }
-        public int? CProvinciaID { get; set; }
-        public int? CDepartamentoID { get; set; }
-        public int? CLocalidadID { get; set; }
-        public string Correo { get; set; }
+    public bool? VinculadoJardin { get; set; }
 
-        public bool? VerificadoTotem { get; set; }
+    public bool? VerificadoTotem { get; set; }
 
-        public string Ejemplar { get; set; }
+    public string? Ejemplar { get; set; }
 
-        public string NumTramite { get; set; }
-        public string CodigoPedidosWeb { get; set; }    
+    public string? NumTramite { get; set; }
 
-        public string Alias { get; set; }
+    public int? IdBarrio { get; set; }
 
-        public int? IdMPI { get; set; }
-        public string DatosAdicionales { get; set; }
+    public string? CodigoPedidosWeb { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Anamnesis> Anamnesis { get; set; }
+    public DateTime? CreadoPorWpp { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Consultas_Ambulatorias> Consultas_Ambulatorias { get; set; }
+    public bool? ValidadoPorWpp { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Derivaciones_Envios> Derivaciones_Envios { get; set; }
+    public string? Alias { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<FarmaciaEgreso> FarmaciaEgreso { get; set; }
+    public int? IdMpi { get; set; }
 
-        public virtual EstadoCivil EstadoCivil { get; set; }
+    public string? DatosAdicionales { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Internaciones> Internaciones { get; set; }
+    public virtual ICollection<Anamnesis> Anamnesis { get; set; } = new List<Anamnesis>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Numerador_HC> Numerador_HC { get; set; }
-        public virtual ObraSocial ObraSocial { get; set; }
+    public virtual ICollection<DerivacionesEnvios> DerivacionesEnvios { get; set; } = new List<DerivacionesEnvios>();
 
-        public virtual Paises Paises { get; set; }
+    public virtual ICollection<GrupoFamiliar> GrupoFamiliar { get; set; } = new List<GrupoFamiliar>();
+    [JsonIgnore]
 
-        public virtual Sexo Sexo { get; set; }
+    public virtual ICollection<GuardiaRegistro> GuardiaRegistro { get; set; } = new List<GuardiaRegistro>();
 
-        public virtual Sexo Sexo1 { get; set; }
+    public virtual ICollection<ImagenRegistro> ImagenRegistro { get; set; } = new List<ImagenRegistro>();
 
-        public virtual Tipo_Documento Tipo_Documento { get; set; }
+    public virtual ICollection<IndicacionesDieta> IndicacionesDieta { get; set; } = new List<IndicacionesDieta>();
 
-        public virtual Tipo_Documento Tipo_Documento1 { get; set; }
+    public virtual ICollection<IndicacionesKinesiologia> IndicacionesKinesiologia { get; set; } = new List<IndicacionesKinesiologia>();
 
-        public virtual Tipo_Instruccion Tipo_Instruccion { get; set; }
+    public virtual ICollection<IndicacionesObservacionesGrales> IndicacionesObservacionesGrales { get; set; } = new List<IndicacionesObservacionesGrales>();
 
-        public virtual Tipo_Laboral Tipo_Laboral { get; set; }
+    public virtual ICollection<IndicacionesPosicion> IndicacionesPosicion { get; set; } = new List<IndicacionesPosicion>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Turnos> Turnos { get; set; }
+    public virtual ICollection<IndicacionesVentilacionMecanica> IndicacionesVentilacionMecanica { get; set; } = new List<IndicacionesVentilacionMecanica>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ShockRoom_Anamnesis> ShockRoom_Anamnesis { get; set; }
+    public virtual ICollection<InternacionAcompanantes> InternacionAcompanantes { get; set; } = new List<InternacionAcompanantes>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ShockRoom_Registro> ShockRoom_Registro { get; set; }
+    public virtual ICollection<Internaciones> Internaciones { get; set; } = new List<Internaciones>();
 
-        //----
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Dieta> Indicaciones_Dieta { get; set; }
+    public virtual ICollection<Pacientes> InversePacienteIdrefNavigation { get; set; } = new List<Pacientes>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Kinesiologia> Indicaciones_Kinesiologia { get; set; }
+    public virtual ICollection<MedicacionDiscreta> MedicacionDiscreta { get; set; } = new List<MedicacionDiscreta>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_ObservacionesGrales> Indicaciones_ObservacionesGrales { get; set; }
+    public virtual ICollection<MedicacionInfusionContinua> MedicacionInfusionContinua { get; set; } = new List<MedicacionInfusionContinua>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_Posicion> Indicaciones_Posicion { get; set; }
+    public virtual ICollection<MedicacionPaciente> MedicacionPaciente { get; set; } = new List<MedicacionPaciente>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Indicaciones_VentilacionMecanica> Indicaciones_VentilacionMecanica { get; set; }
+    public virtual ICollection<NotificacionCovidResidencia> NotificacionCovidResidencia { get; set; } = new List<NotificacionCovidResidencia>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<OrientacionObstetrica> OrientacionObstetrica { get; set; }
+    public virtual ICollection<NotificacionDengue> NotificacionDengue { get; set; } = new List<NotificacionDengue>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaRegistro> GuardiaRegistro { get; set; }
+    public virtual ICollection<NotificacionesCovid> NotificacionesCovid { get; set; } = new List<NotificacionesCovid>();
+    [JsonIgnore]
+    public virtual ICollection<NumeradorHc> NumeradorHc { get; set; } = new List<NumeradorHc>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPaciente> MedicacionPaciente { get; set; }
+    public virtual ICollection<Odontograma> Odontograma { get; set; } = new List<Odontograma>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Vacunas_Pacientes> Vacunas_Pacientes { get; set; }
+    public virtual ICollection<OrientacionObstetrica> OrientacionObstetrica { get; set; } = new List<OrientacionObstetrica>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PrescripcionEncabezado> PrescripcionEncabezado { get; set; }
+    public virtual PacienteEstado? PacienteEstado { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<PacienteEstado> PacienteEstado { get; set; }
+    public virtual Pacientes? PacienteIdrefNavigation { get; set; }
 
-        public virtual Pacientes PacienteReferencia { get; set; }
+    public virtual ICollection<PrescripcionEncabezado> PrescripcionEncabezado { get; set; } = new List<PrescripcionEncabezado>();
 
-        public virtual Localidades Localidades { get; set; }
+    public virtual ICollection<ShockRoomAnamnesis> ShockRoomAnamnesis { get; set; } = new List<ShockRoomAnamnesis>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Turnos_Quirofano> Turnos_Quirofano { get; set; }
+    public virtual ICollection<ShockRoomRegistro> ShockRoomRegistro { get; set; } = new List<ShockRoomRegistro>();
 
+    public virtual ICollection<Turnos> Turnos { get; set; } = new List<Turnos>();
 
-    }
+    public virtual ICollection<TurnosQuirofano> TurnosQuirofano { get; set; } = new List<TurnosQuirofano>();
 }

@@ -1,74 +1,77 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class MedicacionPacienteDetalle
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    public int MedicacionPacienteDetalleId { get; set; }
 
-    [Table("MedicacionPacienteDetalle")]
-    public partial class MedicacionPacienteDetalle
-    {
-        public int MedicacionPacienteDetalleID { get; set; }
+    public int MedicacionPacienteId { get; set; }
 
-        public int MedicacionPacienteID { get; set; }
+    public int? FarmaciaArticuloId { get; set; }
 
-        public int? FarmaciaArticuloID { get; set; }
+    public int? NuevaDro { get; set; }
 
-        public int? NuevaDro { get; set; }
+    public int? MultiDro { get; set; }
 
-        public int? MultiDro { get; set; }
+    public int TipoEstadoMedicacionPacienteDetalleId { get; set; }
 
-        public int TipoEstadoMedicacionPacienteDetalleID { get; set; }
+    public string ArticuloNombre { get; set; } = null!;
 
-        [Required]
-        [StringLength(100)]
-        public string ArticuloNombre { get; set; }
+    public string? ArticuloPresentacion { get; set; }
 
-        [StringLength(100)]
-        public string ArticuloPresentacion { get; set; }
+    public string? ArticuloDroga { get; set; }
 
-        [StringLength(100)]
-        public string ArticuloDroga { get; set; }
+    public decimal Cantidad { get; set; }
 
-        public decimal Cantidad { get; set; }
+    public DateTime FechaCrea { get; set; }
 
-        public DateTime FechaCrea { get; set; }
+    public DateTime? FechaRetira { get; set; }
 
-        public DateTime? FechaRetira { get; set; }
+    public DateTime? FechaModifica { get; set; }
 
-        public DateTime? FechaModifica { get; set; }
+    public DateTime? FechaAplicacion { get; set; }
 
-        public DateTime? FechaAplicacion { get; set; }
+    public string UsuarioCrea { get; set; } = null!;
 
-        [StringLength(11)]
-        public string UsuarioCrea { get; set; }
+    public string? UsuarioModifica { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioModifica { get; set; }
+    public string? UsuarioAplica { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioAplica { get; set; }
+    public bool Anulado { get; set; }
 
-        public bool Anulado { get; set; }
+    public string? Descripcion { get; set; }
 
-        public string Descripcion { get; set; }
-        public int? ViaTipoID { get; set; }
-        public string Tipo { get; set; }
-        public int? FrecuenciaHs { get; set; }
-        public int? Goteo { get; set; }
-        public int? TipoGoteoID { get; set; }
-        public string InicioServicio { get; set; }
-        public string ObservacionMedico { get; set; }
-        public string ObservacionEnfermero { get; set; }
-        public string ObservacionRevierte { get; set; }
-        public int? EnfermeroAplicaID { get; set; }
-        public bool? sinStock { get; set; }
-        public string ObservacionSinStock { get; set; }
-        public virtual FarmaciaArticulo FarmaciaArticulo { get; set; }
+    public int? ViaTipoId { get; set; }
 
-        public virtual MedicacionPaciente MedicacionPaciente { get; set; }
+    public string? Tipo { get; set; }
 
-        public virtual TipoEstadoMedicacionPacienteDetalle TipoEstadoMedicacionPacienteDetalle { get; set; }
+    public int? FrecuenciaHs { get; set; }
 
-    }
+    public int? Goteo { get; set; }
+
+    public int? TipoGoteoId { get; set; }
+
+    public string? InicioServicio { get; set; }
+
+    public int? ConsultaId { get; set; }
+
+    public string? ObservacionMedico { get; set; }
+
+    public string? ObservacionEnfermero { get; set; }
+
+    public string? ObservacionRevierte { get; set; }
+
+    public int? EnfermeroAplicaId { get; set; }
+
+    public bool? SinStock { get; set; }
+
+    public string? ObservacionSinStock { get; set; }
+
+    public virtual FarmaciaArticulo? FarmaciaArticulo { get; set; }
+
+    public virtual MedicacionPaciente MedicacionPaciente { get; set; } = null!;
+
+    public virtual TipoEstadoMedicacionPacienteDetalle TipoEstadoMedicacionPacienteDetalle { get; set; } = null!;
 }

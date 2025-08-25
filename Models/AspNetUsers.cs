@@ -1,63 +1,59 @@
-namespace WebHospital.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class AspNetUsers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
+    public string Id { get; set; } = null!;
 
-    public partial class AspNetUsers
-    {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public AspNetUsers()
-        {
-            AspNetUserClaims = new HashSet<AspNetUserClaims>();
-            AspNetUserLogins = new HashSet<AspNetUserLogins>();
-            AspNetRoles = new HashSet<AspNetRoles>();
-        }
+    public string? Email { get; set; }
 
-        public string Id { get; set; }
+    public bool EmailConfirmed { get; set; }
 
-        [StringLength(256)]
-        public string Email { get; set; }
+    public string? PasswordHash { get; set; }
 
-        public bool EmailConfirmed { get; set; }
+    public string? SecurityStamp { get; set; }
 
-        public string PasswordHash { get; set; }
+    public string? PhoneNumber { get; set; }
 
-        public string SecurityStamp { get; set; }
+    public bool PhoneNumberConfirmed { get; set; }
 
-        public string PhoneNumber { get; set; }
+    public bool TwoFactorEnabled { get; set; }
 
-        public bool PhoneNumberConfirmed { get; set; }
+    public DateTime? LockoutEndDateUtc { get; set; }
 
-        public bool TwoFactorEnabled { get; set; }
+    public bool LockoutEnabled { get; set; }
 
-        public DateTime? LockoutEndDateUtc { get; set; }
+    public int AccessFailedCount { get; set; }
 
-        public bool LockoutEnabled { get; set; }
+    public string UserName { get; set; } = null!;
 
-        public int AccessFailedCount { get; set; }
+    public string? Name { get; set; }
 
-        [Required]
-        [StringLength(256)]
-        public string UserName { get; set; }
+    public string? UserIdoriginal { get; set; }
 
-        [StringLength(256)]
-        public string Name { get; set; }
-        public string UserIDOriginal { get; set; }
-        public string Token { get; set; }
-        public bool? RequiereCambioClave { get; set; }
-        public string TokenZismed { get; set; }
-        public DateTime? CaduceTokenZismed { get; set; }
+    public string? Token { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<AspNetUserClaims> AspNetUserClaims { get; set; }
+    public bool? RequiereCambioClave { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<AspNetUserLogins> AspNetUserLogins { get; set; }
+    public string? TokenZismed { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<AspNetRoles> AspNetRoles { get; set; }
-    }
+    public DateTime? CaduceTokenZismed { get; set; }
+
+    public string? UserNameAbbott { get; set; }
+
+    public virtual ICollection<AgendaTareaAdjuntos> AgendaTareaAdjuntos { get; set; } = new List<AgendaTareaAdjuntos>();
+
+    public virtual ICollection<AgendaTareaAspNetUsers> AgendaTareaAspNetUsers { get; set; } = new List<AgendaTareaAspNetUsers>();
+
+    public virtual ICollection<AgendaTareaComentarios> AgendaTareaComentarios { get; set; } = new List<AgendaTareaComentarios>();
+
+    public virtual ICollection<AspNetUserClaims> AspNetUserClaims { get; set; } = new List<AspNetUserClaims>();
+
+    public virtual ICollection<AspNetUserLogins> AspNetUserLogins { get; set; } = new List<AspNetUserLogins>();
+
+    public virtual ICollection<AspNetUserRoles> AspNetUserRoles { get; set; } = new List<AspNetUserRoles>();
+
+    public virtual ICollection<FarmaciaSucursalXusuario> FarmaciaSucursalXusuario { get; set; } = new List<FarmaciaSucursalXusuario>();
 }

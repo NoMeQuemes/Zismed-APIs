@@ -1,48 +1,33 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class GuardiaDerivacionInterna
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
+    public int GuardiaDerivacionInternaId { get; set; }
 
-    [Table("GuardiaDerivacionInterna")]
-    public partial class GuardiaDerivacionInterna
-    {
-        public int GuardiaDerivacionInternaID { get; set; }
+    public int GuardiaRegistroId { get; set; }
 
-        public int GuardiaRegistroID { get; set; }
+    public int? GuardiaSectorDesdeId { get; set; }
 
-        public int? GuardiaSectorDesdeID { get; set; }
+    public int? ConsultorioDesdeId { get; set; }
 
-        public int? ConsultorioDesdeID { get; set; }
+    public int? GuardiaSectorHastaId { get; set; }
 
-        public int? GuardiaSectorHastaID { get; set; }
+    public int? GuardiaCamaId { get; set; }
 
-        public int? GuardiaCamaID { get; set; }
+    public int PrestadorId { get; set; }
 
-        [Display(Name = "Prestador")]
-        public int PrestadorID { get; set; }
+    public DateTime Fecha { get; set; }
 
-        public DateTime Fecha { get; set; }
+    public string Usuario { get; set; } = null!;
 
-        [StringLength(11)]
-        public string Usuario { get; set; }
+    public DateTime FechaCrea { get; set; }
 
-        public DateTime FechaCrea { get; set; }
+    public DateTime? FechaModifica { get; set; }
 
-        public DateTime? FechaModifica { get; set; }
+    public bool Anulado { get; set; }
 
-        public bool Anulado { get; set; }
-
-        public virtual GuardiaRegistro GuardiaRegistro { get; set; }
-
-        public virtual GuardiaSector GuardiaSectorDesde { get; set; }
-
-        public virtual GuardiaSector GuardiaSectorHasta { get; set; }
-
-        public virtual Prestadores Prestadores { get; set; }
-
-        public virtual GuardiaCama GuardiaCama { get; set; }
-    }
+    public virtual Prestadores Prestador { get; set; } = null!;
 }

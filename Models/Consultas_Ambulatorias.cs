@@ -4,17 +4,16 @@ namespace Zismed_Apis.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     public partial class Consultas_Ambulatorias
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public Consultas_Ambulatorias()
-        {
-            Pedidos_EnConsultorio = new HashSet<Pedidos_EnConsultorio>();
-            MedicacionPaciente = new HashSet<MedicacionPaciente>();
+        //public Consultas_Ambulatorias()
+        //{
+        //    Pedidos_EnConsultorio = new HashSet<Pedidos_EnConsultorio>();
+        //    MedicacionPaciente = new HashSet<MedicacionPaciente>();
             
-        }
+        //}
 
         [Key]
         public int ConsultaID { get; set; }
@@ -70,29 +69,29 @@ namespace Zismed_Apis.Models
 
         public string DiagnosticoPrincipalVar { get; set; }
 
-        [NotMapped] // Esto indica que no se mapeará a la base de datos
-        public List<Diagnosticos_Consultas> DiagnosticosList { get; set; } = new List<Diagnosticos_Consultas>();
+        //[NotMapped] // Esto indica que no se mapeará a la base de datos
+        //public List<Diagnosticos_Consultas> DiagnosticosList { get; set; } = new List<Diagnosticos_Consultas>();
 
-        public virtual GuardiaRegistro GuardiaRegistro { get; set; }
-        public virtual GuardiaSector GuardiaSector { get; set; }
-        public virtual Pacientes Pacientes { get; set; }
-        public virtual Prestadores Prestadores { get; set; }
-        public virtual Diagnosticos_Consultas Diagnosticos_Consultas { get; set; }
-        public virtual Diagnosticos_Consultas Diagnosticos_Consultas1 { get; set; }
-        public virtual ObraSocial ObraSocial { get; set; }
-        public virtual Interconsulta Interconsulta { get; set; }
-        public virtual Camas Camas { get; set; }
+        //public virtual GuardiaRegistro GuardiaRegistro { get; set; }
+        //public virtual GuardiaSector GuardiaSector { get; set; }
+        //public virtual Pacientes Pacientes { get; set; }
+        //public virtual Prestadores Prestadores { get; set; }
+        //public virtual Diagnosticos_Consultas Diagnosticos_Consultas { get; set; }
+        //public virtual Diagnosticos_Consultas Diagnosticos_Consultas1 { get; set; }
+        //public virtual ObraSocial ObraSocial { get; set; }
+        //public virtual Interconsulta Interconsulta { get; set; }
+        //public virtual Camas Camas { get; set; }
 
-        public virtual Servicios Servicios { get; set; }
-        public virtual Instituciones Instituciones { get; set; }
+        //public virtual Servicios Servicios { get; set; }
+        //public virtual Instituciones Instituciones { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Pedidos_EnConsultorio> Pedidos_EnConsultorio { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<Pedidos_EnConsultorio> Pedidos_EnConsultorio { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPaciente> MedicacionPaciente { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<MedicacionPaciente> MedicacionPaciente { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Odontograma> Odontograma { get; set; }
+        //[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        //public virtual ICollection<Odontograma> Odontograma { get; set; }
     }
 }

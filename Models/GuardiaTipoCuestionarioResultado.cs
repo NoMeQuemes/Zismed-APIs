@@ -1,26 +1,19 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class GuardiaTipoCuestionarioResultado
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    public int GuardiaTipoCuestionarioResultadoId { get; set; }
 
-    [Table("GuardiaTipoCuestionarioResultado")]
-    public partial class GuardiaTipoCuestionarioResultado
-    {
-        public int GuardiaTipoCuestionarioResultadoID { get; set; }
+    public int GuardiaAnamnesisId { get; set; }
 
-        public int GuardiaAnamnesisID { get; set; }
+    public int GuardiaTipoCuestionarioPreguntaId { get; set; }
 
-        public int GuardiaTipoCuestionarioPreguntaID { get; set; }
+    public string? Resultado { get; set; }
 
-        [StringLength(250)]
-        public string Resultado { get; set; }
+    public bool Anulado { get; set; }
 
-        public bool Anulado { get; set; }
-
-        public virtual GuardiaAnamnesis GuardiaAnamnesis { get; set; }
-
-        public virtual GuardiaTipoCuestionarioPregunta GuardiaTipoCuestionarioPregunta { get; set; }
-    }
+    public virtual GuardiaTipoCuestionarioPregunta GuardiaTipoCuestionarioPregunta { get; set; } = null!;
 }

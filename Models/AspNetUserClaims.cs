@@ -1,23 +1,17 @@
-namespace WebHospital.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class AspNetUserClaims
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
+    public int Id { get; set; }
 
-    public partial class AspNetUserClaims
-    {
-        public int Id { get; set; }
+    public string UserId { get; set; } = null!;
 
-        [Required]
-        [StringLength(128)]
-        public string UserId { get; set; }
+    public string? ClaimType { get; set; }
 
-        public string ClaimType { get; set; }
+    public string? ClaimValue { get; set; }
 
-        public string ClaimValue { get; set; }
-
-        public virtual AspNetUsers AspNetUsers { get; set; }
-    }
+    public virtual AspNetUsers User { get; set; } = null!;
 }

@@ -4,7 +4,6 @@ namespace Zismed_Apis.Models
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
 
     public partial class Anaemnesis_Reducida
     {
@@ -78,12 +77,12 @@ namespace Zismed_Apis.Models
 
         public int? EmfermeroID { get; set; }
 
-        public virtual Pacientes Pacientes { get; set; }
-        public virtual Internaciones Internaciones { get; set; }
+        //public virtual Pacientes Pacientes { get; set; }
+        //public virtual Internaciones Internaciones { get; set; }
 
         public virtual GuardiaRegistro GuardiaRegistro { get; set; }
         public virtual GuardiaSector GuardiaSector { get; set; }
-        public virtual Emfermeros Emfermeros { get; set; }
-        public virtual Instituciones Instituciones { get; set; }
+        //public virtual Emfermeros Emfermeros { get; set; }
+        //public virtual Instituciones Instituciones { get; set; }
     }
 }

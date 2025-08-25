@@ -34,7 +34,7 @@ namespace Zismed_Apis.Controllers
                 var nombreUsuario = User.Identity?.Name;
                 var idInstitucion = 3; // reemplazar con tu lógica real
 
-                var lista = await _Db.PacientesGuardia
+                var lista = await _Db.PacienteGuardiaDtos
                     .FromSqlRaw("EXEC sp_PacientesGuardia {0}, {1}, {2}", id, 1, idInstitucion)
                     .ToListAsync(ct);
 
@@ -52,94 +52,91 @@ namespace Zismed_Apis.Controllers
             }
         }
 
-        [HttpGet("api/guardia/modal-hc")]
-        public async Task<IActionResult> GetModalHC(int id, bool esGuardia)
+        [HttpGet("modalhc")]
+        public async Task<IActionResult> GetModalHC([FromQuery] int id, [FromQuery] bool esGuardia, [FromQuery] int institucionId, [FromQuery] string usuarioNombre)
         {
-            string usuario = User.Identity?.Name ?? "";
-            var institucionClaim = adminController.GetClaimUser("IdInstitucion", usuario);
-            int IdInstUser = Convert.ToInt32(institucionClaim ?? "0");
-
             var objGuardiaRegBD = await _Db.GuardiaRegistro
-                .FirstOrDefaultAsync(t => t.GuardiaRegistroID == id);
+                .FirstOrDefaultAsync(t => t.GuardiaRegistroId == id);
 
             if (objGuardiaRegBD == null)
                 return NotFound("GuardiaRegistro no encontrado.");
 
             var objSector = await _Db.GuardiaSector
-                .Where(a => a.GuardiaSectorID == objGuardiaRegBD.GuardiaSectorID && !a.Anulado)
+                .Where(a => a.GuardiaSectorId == objGuardiaRegBD.GuardiaSectorId && !a.Anulado)
                 .FirstOrDefaultAsync();
 
-            var afiliado = await _Db.Pacientes
-                .FirstOrDefaultAsync(p => p.PacienteID == objGuardiaRegBD.PacienteID);
+            var paciente = await _Db.Pacientes
+                .FirstOrDefaultAsync(p => p.PacienteId == objGuardiaRegBD.PacienteId);
 
-            // Historia clínica
-            var num = await _Db.Numerador_HC
-                .FirstOrDefaultAsync(n => n.PacienteID == objGuardiaRegBD.PacienteID);
+            // Verifica si ya existe numerador HC
+            var num = await _Db.NumeradorHc
+                .FirstOrDefaultAsync(p => p.PacienteId == objGuardiaRegBD.PacienteId);
 
             string numeroHC;
             if (num == null)
             {
-                var aux = await _Db.Numerador_HC
+                var aux = await _Db.NumeradorHc
                     .OrderByDescending(p => p.Numero)
                     .FirstOrDefaultAsync();
 
                 int incrementado = Convert.ToInt32(aux?.Numero ?? "0") + 1;
-                var num_incr = new Numerador_HC
+                string sIncrementado = incrementado.ToString().PadLeft(8, '0');
+
+                var nuevoNumerador = new NumeradorHc
                 {
-                    PacienteID = objGuardiaRegBD.PacienteID,
-                    Numero = incrementado.ToString().PadLeft(8, '0'),
+                    PacienteId = objGuardiaRegBD.PacienteId,
+                    Numero = sIncrementado,
                     Anulado = false
                 };
 
-                _Db.Numerador_HC.Add(num_incr);
+                _Db.NumeradorHc.Add(nuevoNumerador);
                 await _Db.SaveChangesAsync();
 
-                numeroHC = num_incr.Numero;
+                numeroHC = nuevoNumerador.Numero;
             }
             else
             {
                 numeroHC = num.Numero;
             }
 
-            // Tipos de anamnesis
-            var TiposAnamnesisRaw = await _Db.GuardiaTipoCuestionarioXSector
-                .Where(a => a.GuardiaSectorID == objSector.GuardiaSectorID &&
-                            !a.Anulado &&
-                            !a.GuardiaSector.Anulado)
-                .OrderBy(a => a.GuardiaTipoCuestionarioXSectorID)
+            // Datos del sector
+            var tiposAnamnesis = await _Db.GuardiaTipoCuestionarioXsector
+                .Where(a => a.GuardiaSectorId == objSector.GuardiaSectorId && !a.Anulado)
                 .Select(a => new GuardiaTipoAnamnesisView
                 {
-                    TipoID = a.GuardiaTipoCuestionarioID,
+                    TipoID = a.GuardiaTipoCuestionarioId,
                     AnamnesisNombre = a.GuardiaTipoCuestionario.Nombre
                 })
+                .OrderBy(a => a.TipoID)
                 .ToListAsync();
 
-            bool mostrarContenido = objSector.ConsultaMedica || objSector.SignosVitales
-                || objSector.MedicacionContinua || objSector.MedicacionDiscreta
-                || objSector.ProcedimientoCuraciones || TiposAnamnesisRaw.Count > 0;
+            bool noMostrarNada = !objSector.ConsultaMedica && !objSector.SignosVitales &&
+                                 !objSector.MedicacionContinua && !objSector.MedicacionDiscreta &&
+                                 !objSector.ProcedimientoCuraciones && tiposAnamnesis.Count == 0;
 
-            // Obtener claims
-            var userDb = await _Db.AspNetUsers.FirstOrDefaultAsync(u => u.UserName == usuario);
-            var claimEnf = await _Db.AspNetUserClaims.FirstOrDefaultAsync(c =>
-                c.UserId == userDb.Id && c.ClaimType == "EnfermeroID");
+            // Claims del usuario
+            var user = await _Db.AspNetUsers.FirstOrDefaultAsync(u => u.UserName == usuarioNombre);
+            string userId = user?.Id;
 
-            var claimPres = await _Db.AspNetUserClaims.FirstOrDefaultAsync(c =>
-                c.UserId == userDb.Id && c.ClaimType == "PrestadorID");
+            var enfermeroClaim = await _Db.AspNetUserClaims.FirstOrDefaultAsync(c => c.UserId == userId && c.ClaimType == "EnfermeroID");
+            var prestadorClaim = await _Db.AspNetUserClaims.FirstOrDefaultAsync(c => c.UserId == userId && c.ClaimType == "PrestadorID");
 
-            var response = new
+            var dto = new
             {
-                InstitucionID = IdInstUser,
+                InstitucionID = institucionId,
                 Guardia = esGuardia,
                 Titulo = objSector?.Nombre.Trim() ?? "ERROR",
-                AfiliadosInfo = afiliado,
-                GuardiaRegistroID = id,
-                PacienteID = objGuardiaRegBD.PacienteID,
-                GuardiaSectorID = objGuardiaRegBD.GuardiaSectorID,
-                Numero_HC = numeroHC,
-                ConfigSector = new
+                AfiliadosInfo = paciente,
+                GuardiaRegistroID = objGuardiaRegBD.GuardiaRegistroId,
+                PacienteID = objGuardiaRegBD.PacienteId,
+                GuardiaSectorID = objGuardiaRegBD.GuardiaSectorId,
+                NumeroHC = numeroHC,
+                NoMostrarNada = noMostrarNada,
+                TiposAnamnesis = tiposAnamnesis,
+                ConfigSector = objSector == null ? null : new
                 {
                     objSector.Codigo,
-                    objSector.GuardiaSectorID,
+                    objSector.GuardiaSectorId,
                     objSector.ConsultaMedica,
                     objSector.SignosVitales,
                     objSector.MedicacionDiscreta,
@@ -157,18 +154,15 @@ namespace Zismed_Apis.Controllers
                     objSector.Consentimientos,
                     objSector.NotificacionesCovid,
                     NotificacionDengues = objSector.NotificacionDengues ?? false,
-                    objSector.InformeCCI
+                    objSector.InformeCci
                 },
-                NoMostrarNada = !mostrarContenido,
-                TiposAnamnesis = TiposAnamnesisRaw,
-                Enfermero = claimEnf?.ClaimValue == "0" || claimEnf == null,
-                EnfermeroID = claimEnf?.ClaimValue,
-                Prestador = claimPres?.ClaimValue == "0" || claimPres == null,
-                PrestadorID = claimPres?.ClaimValue
+                Enfermero = enfermeroClaim == null || enfermeroClaim.ClaimValue == "0" ? null : enfermeroClaim.ClaimValue,
+                Prestador = prestadorClaim == null || prestadorClaim.ClaimValue == "0" ? null : prestadorClaim.ClaimValue
             };
 
-            return Ok(response);
+            return Ok(dto);
         }
+
 
 
 

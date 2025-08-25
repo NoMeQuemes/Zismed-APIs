@@ -1,132 +1,111 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class MedicacionPaciente
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using WebHospital.Models;
+    public int MedicacionPacienteId { get; set; }
 
-    [Table("MedicacionPaciente")]
-    public partial class MedicacionPaciente
-    {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public MedicacionPaciente()
-        {
-            MedicacionPacienteDetalle = new HashSet<MedicacionPacienteDetalle>();
-            MedicacionPacienteHistorico = new HashSet<MedicacionPacienteHistorico>();
-        }
+    public int PacienteId { get; set; }
 
-        [Key]
-        public int MedicacionPacienteID { get; set; }
+    public int PrestadorPrescribeId { get; set; }
 
-        public int PacienteID { get; set; }
+    public int? PrestadorRetiraId { get; set; }
 
-        public int PrestadorPrescribeID { get; set; }
+    public int? GuardiaRegistroId { get; set; }
 
-        public int? PrestadorRetiraID { get; set; }
+    public int? GuardiaSectorId { get; set; }
 
-        public int? GuardiaRegistroID { get; set; }
+    public int? InternacionId { get; set; }
 
-        public int? GuardiaSectorID { get; set; }
+    public int? SectorInternadoId { get; set; }
 
-        public int? InternacionID { get; set; }
+    public int? TurnoId { get; set; }
 
-        public int? SectorInternadoID { get; set; }
+    public int? ServicioId { get; set; }
 
-        public int? TurnoID { get; set; }
+    public int? ConsultaId { get; set; }
 
-        public int? ServicioID { get; set; }
+    public int MedicacionViaId { get; set; }
 
-        public int? ConsultaID { get; set; }
+    public int? TipoGoteoId { get; set; }
 
-        public int MedicacionViaID { get; set; }
+    public int? SolucionId { get; set; }
 
-        public int? TipoGoteoID { get; set; }
+    public int TipoEstadoMedicacionId { get; set; }
 
-        public int? SolucionID { get; set; }
+    public int? EmfermeroId { get; set; }
 
-        public int TipoEstadoMedicacionID { get; set; }
+    public string Tipo { get; set; } = null!;
 
-        public int? EnfermeriaID { get; set; }
-        public int? EmfermeroID { get; set; }
+    public string? Programa { get; set; }
 
-        [StringLength(20)]
-        public string Tipo { get; set; }
+    public int? FrecuenciaHs { get; set; }
 
-        [StringLength(80)]
-        public string Programa { get; set; }
+    public int? Goteo { get; set; }
 
-        public int? FrecuenciaHs { get; set; }
+    public decimal? CantidadSolucion { get; set; }
 
-        public int? Goteo { get; set; }
+    public DateTime FechaPrescribe { get; set; }
 
-        public decimal? CantidadSolucion { get; set; }
+    public DateTime? FechaRetira { get; set; }
 
-        public DateTime FechaPrescribe { get; set; }
+    public DateTime FechaCrea { get; set; }
 
-        public DateTime? FechaRetira { get; set; }
+    public DateTime? FechaModifica { get; set; }
 
-        public DateTime FechaCrea { get; set; }
+    public DateTime? FechaProcesa { get; set; }
 
-        public DateTime? FechaModifica { get; set; }
+    public DateTime? FechaAplica { get; set; }
 
-        public DateTime? FechaProcesa { get; set; }
+    public string UsuarioCrea { get; set; } = null!;
 
-        public DateTime? FechaAplica { get; set; }
+    public string? UsuarioModifica { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioCrea { get; set; }
+    public string? UsuarioProcesa { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioModifica { get; set; }
+    public string? UsuarioAplica { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioProcesa { get; set; }
+    public bool Anulado { get; set; }
 
-        [StringLength(11)]
-        public string UsuarioAplica { get; set; }
+    public int? PrescripcionId { get; set; }
 
-        public bool Anulado { get; set; }
+    public int? EnfermeriaId { get; set; }
 
-        public int? PrescripcionID { get; set; }
+    public int? Opcion { get; set; }
 
-        public int? Opcion { get; set; }
+    public int? InstitucionId { get; set; }
 
-        public int? InstitucionID { get; set; }
-        public string Evolucion { get; set; }
-        public string ObservacionAdicional { get; set; }
+    public string? Evolucion { get; set; }
 
-        public virtual GuardiaSector GuardiaSector { get; set; }
+    public string? ObservacionAdicional { get; set; }
 
-        public virtual Habitaciones_Hospital Habitaciones_Hospital { get; set; }
+    public virtual ConsultasAmbulatorias? Consulta { get; set; }
 
-        public virtual MedicacionVia MedicacionVia { get; set; }
+    public virtual ICollection<Enfermeria> Enfermeria { get; set; } = new List<Enfermeria>();
 
-        public virtual Turnos Turno { get; set; }
+    public virtual GuardiaSector? GuardiaSector { get; set; }
 
-        public virtual Consultas_Ambulatorias Consultas_Ambulatorias { get; set; }
+    public virtual Internaciones? Internacion { get; set; }
 
-        public virtual Pacientes Pacientes { get; set; }
+    public virtual ICollection<MedicacionPacienteDetalle> MedicacionPacienteDetalle { get; set; } = new List<MedicacionPacienteDetalle>();
 
-        public virtual Prestadores Prestadores { get; set; }
+    public virtual ICollection<MedicacionPacienteHistorico> MedicacionPacienteHistorico { get; set; } = new List<MedicacionPacienteHistorico>();
 
-        public virtual Prestadores Prestadores1 { get; set; }
+    public virtual MedicacionVia MedicacionVia { get; set; } = null!;
 
-        public virtual TipoEstadoMedicacionPaciente TipoEstadoMedicacionPaciente { get; set; }
+    public virtual Pacientes Paciente { get; set; } = null!;
 
-        public virtual TipoGoteo TipoGoteo { get; set; }
+    public virtual Prestadores PrestadorPrescribe { get; set; } = null!;
 
-        public virtual Emfermeros Emfermeros { get; set; }
+    public virtual Prestadores? PrestadorRetira { get; set; }
 
-        public virtual Instituciones Instituciones { get; set; }
+    public virtual HabitacionesHospital? SectorInternado { get; set; }
 
+    public virtual Servicios? Servicio { get; set; }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPacienteDetalle> MedicacionPacienteDetalle { get; set; }
+    public virtual TipoEstadoMedicacionPaciente TipoEstadoMedicacion { get; set; } = null!;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<MedicacionPacienteHistorico> MedicacionPacienteHistorico { get; set; }
-
-        
-    }
+    public virtual TipoGoteo? TipoGoteo { get; set; }
 }

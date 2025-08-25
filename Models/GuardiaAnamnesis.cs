@@ -1,49 +1,35 @@
-namespace Zismed_Apis.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class GuardiaAnamnesis
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
+    public int GuardiaAnamnesisId { get; set; }
 
-    public partial class GuardiaAnamnesis
-    {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public GuardiaAnamnesis()
-        {
-            GuardiaTipoCuestionarioResultado = new HashSet<GuardiaTipoCuestionarioResultado>();
-        }
+    public int GuardiaRegistroId { get; set; }
 
-        public int GuardiaAnamnesisID { get; set; }
+    public int GuardiaSectorId { get; set; }
 
-        public int GuardiaRegistroID { get; set; }
+    public int GuardiaTipoCuestionarioId { get; set; }
 
-        public int GuardiaSectorID { get; set; }
+    public int? PrestadorId { get; set; }
 
-        public int GuardiaTipoCuestionarioID { get; set; }
+    public int? EmpleadoId { get; set; }
 
-        public int? PrestadorID { get; set; }
+    public DateTime FechaAnamneisis { get; set; }
 
-        public int? EmpleadoId { get; set; }
-        public int? EmfermeroID { get; set; }
+    public DateTime FechaCrea { get; set; }
 
-        public DateTime FechaAnamneisis { get; set; }
+    public string Usuario { get; set; } = null!;
 
-        public DateTime FechaCrea { get; set; }
+    public bool Anulado { get; set; }
 
-        [StringLength(11)]
-        public string Usuario { get; set; }
+    public int? EmfermeroId { get; set; }
 
-        public bool Anulado { get; set; }
+    public virtual GuardiaRegistro GuardiaRegistro { get; set; } = null!;
 
-        public virtual GuardiaRegistro GuardiaRegistro { get; set; }
+    public virtual GuardiaTipoCuestionario GuardiaTipoCuestionario { get; set; } = null!;
 
-        public virtual GuardiaSector GuardiaSector { get; set; }
-
-        public virtual Prestadores Prestadores { get; set; }
-
-        public virtual GuardiaTipoCuestionario GuardiaTipoCuestionario { get; set; }
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<GuardiaTipoCuestionarioResultado> GuardiaTipoCuestionarioResultado { get; set; }
-    }
+    public virtual Prestadores? Prestador { get; set; }
 }

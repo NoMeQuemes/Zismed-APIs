@@ -1,30 +1,21 @@
-namespace WebHospital.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace Zismed_Apis.Models;
+
+public partial class MedicacionPacienteHistorico
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Data.Entity.Spatial;
+    public int MedicacionPacienteHistoricoId { get; set; }
 
-    [Table("MedicacionPacienteHistorico")]
-    public partial class MedicacionPacienteHistorico
-    {
-        public int MedicacionPacienteHistoricoID { get; set; }
+    public int MedicacionPacienteId { get; set; }
 
-        public int MedicacionPacienteID { get; set; }
+    public string Accion { get; set; } = null!;
 
-        [Required]
-        [StringLength(80)]
-        public string Accion { get; set; }
+    public DateTime Fecha { get; set; }
 
-        public DateTime Fecha { get; set; }
+    public string Usuario { get; set; } = null!;
 
-        [Required]
-        [StringLength(11)]
-        public string Usuario { get; set; }
+    public bool Anulado { get; set; }
 
-        public bool Anulado { get; set; }
-
-        public virtual MedicacionPaciente MedicacionPaciente { get; set; }
-    }
+    public virtual MedicacionPaciente MedicacionPaciente { get; set; } = null!;
 }
