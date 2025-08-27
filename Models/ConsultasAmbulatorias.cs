@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Zismed_Apis.Models;
 
@@ -7,6 +8,7 @@ public partial class ConsultasAmbulatorias
 {
     public int ConsultaId { get; set; }
 
+    [ForeignKey(nameof(PacienteId))]
     public int PacienteId { get; set; }
 
     public int? TurnoId { get; set; }
@@ -80,4 +82,9 @@ public partial class ConsultasAmbulatorias
     public virtual ObraSocial ObraSocial { get; set; } = null!;
 
     public virtual ICollection<PedidosEnConsultorio> PedidosEnConsultorio { get; set; } = new List<PedidosEnConsultorio>();
+    public virtual Pacientes Pacientes { get; set; }
+    public virtual DiagnosticosConsultas DiagnosticosConsultas { get; set; }
+    [NotMapped] // Esto indica que no se mapeará a la base de datos
+    [ForeignKey(nameof(DiagnosticoPrincipalId))]
+    public List<DiagnosticosConsultas> DiagnosticosList { get; set; } = new List<DiagnosticosConsultas>();
 }

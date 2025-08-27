@@ -15,16 +15,18 @@ namespace Zismed_Apis.Controllers
         private readonly ILogger<GuardiaController> _logger;
         private readonly ApplicationDbContext _Db;
         protected ApiResponse _response;
+        private readonly InstitucionesService _institucionesService;
 
-        public GuardiaController(ILogger<GuardiaController> logger, ApplicationDbContext Db)
+        public GuardiaController(ILogger<GuardiaController> logger, ApplicationDbContext Db, InstitucionesService institucionesService)
         {
             _logger = logger;
             _Db = Db;
             _response = new();
+            _institucionesService = institucionesService;
         }
 
-        // GET /guardia/sector/{id}/pacientes
-        [HttpGet("sector/{id}/pacientes")]
+        //Trae todos los pacientes anotados en un sector específico de la guardia
+        [HttpGet("pacientePorSector/{id}/")]
         [ProducesResponseType(typeof(IEnumerable<PacienteGuardiaDto>), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse>> ObtenerPacientesDelSector(int id, CancellationToken ct)
         {
@@ -52,7 +54,8 @@ namespace Zismed_Apis.Controllers
             }
         }
 
-        [HttpGet("modalhc")]
+        //Muestra los "sectores" que tiene ese sector de guardia
+        [HttpGet("modalHc")]
         public async Task<IActionResult> GetModalHC([FromQuery] int id, [FromQuery] bool esGuardia, [FromQuery] int institucionId, [FromQuery] string usuarioNombre)
         {
             var objGuardiaRegBD = await _Db.GuardiaRegistro
@@ -164,6 +167,117 @@ namespace Zismed_Apis.Controllers
         }
 
 
+        [HttpGet("consultasPorPaciente")]
+        public async Task<IActionResult> GetConsultasGuardia(int? registroId, int? institucionId)
+        {
+            // Validación de entrada
+            if (!registroId.HasValue)
+            {
+                return BadRequest("registroId es requerido.");
+            }
+
+            // Obtener el PacienteID sin datos de usuario
+            var guardia = await _Db.GuardiaRegistro
+                .AsNoTracking()
+                .FirstOrDefaultAsync(g => g.GuardiaRegistroId == registroId);
+
+            if (guardia == null)
+            {
+                return NotFound("GuardiaRegistro no encontrado.");
+            }
+
+            var pacienteId = guardia.PacienteId;
+
+            // Optimización de consultas
+            var consultas = await _Db.ConsultasAmbulatorias
+                .Include(c => c.Pacientes)
+                .Include(c => c.ObraSocial)
+                .Where(c => !c.Anulado && c.PacienteId == pacienteId)
+                .ToListAsync();
+
+            // Recopila y mapea todos los diagnósticos en una sola pasada
+            var todosLosDiagnosticosIds = new HashSet<int>();
+            foreach (var consulta in consultas)
+            {
+                if (consulta.DiagnosticoPrincipalId != 0)
+                {
+                    todosLosDiagnosticosIds.Add(consulta.DiagnosticoPrincipalId);
+                }
+
+                if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
+                {
+                    var idsFromVar = consulta.DiagnosticoPrincipalVar
+                        .Trim().Trim('|')
+                        .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => int.Parse(id.Trim()));
+
+                    foreach (var id in idsFromVar)
+                    {
+                        todosLosDiagnosticosIds.Add(id);
+                    }
+                }
+            }
+
+            var diagnosticos = await _Db.DiagnosticosConsultas
+                .Where(d => todosLosDiagnosticosIds.Contains(d.DiagnosticosConsultasId))
+                .ToDictionaryAsync(d => d.DiagnosticosConsultasId);
+
+            foreach (var consulta in consultas)
+            {
+                var diagnosticosDeConsulta = new List<DiagnosticosConsultas>();
+                if (diagnosticos.TryGetValue(consulta.DiagnosticoPrincipalId, out var principal))
+                {
+                    diagnosticosDeConsulta.Add(principal);
+                }
+                if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
+                {
+                    var idsFromVar = consulta.DiagnosticoPrincipalVar
+                        .Trim().Trim('|')
+                        .Split('|', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(id => int.Parse(id.Trim()));
+
+                    foreach (var id in idsFromVar)
+                    {
+                        if (diagnosticos.TryGetValue(id, out var diagnostico))
+                        {
+                            diagnosticosDeConsulta.Add(diagnostico);
+                        }
+                    }
+                }
+                consulta.DiagnosticosList = diagnosticosDeConsulta;
+            }
+
+            // Filtra por institución si se proporciona el ID
+            var result = consultas
+                .Where(c => !institucionId.HasValue || c.InstitucionId == institucionId.Value)
+                .OrderByDescending(c => c.ConsultaId)
+                .ToList();
+
+            // Mapea a DTO  
+            var resultDto = result.Select(c => new ConsultaAmbulatoriaDto
+            {
+                ConsultaId = c.ConsultaId,
+                Fecha = c.Fecha,
+                Evolucion = c.Evolucion,
+                PacienteId = c.PacienteId,
+                ObraSocialId = c.ObraSocialId,
+                NombreObraSocial = c.ObraSocial?.Nombre,
+                Diagnosticos = c.DiagnosticosList?.Select(d => new DiagnosticosConsultasDto
+                {
+                    DiagnosticosConsultasId = d.DiagnosticosConsultasId,
+                    Nombre = d.Nombre
+                }).ToList()
+            }).ToList();
+
+            // Respuesta en formato JSON
+            return Ok(new
+            {
+                PacienteID = pacienteId,
+                RegistroID = registroId,
+                InstitucionID = institucionId,
+                Result = resultDto
+            });
+        }
 
 
         public class ListadoGuardia

@@ -180,4 +180,6 @@ public partial class Pacientes
     public virtual ICollection<Turnos> Turnos { get; set; } = new List<Turnos>();
 
     public virtual ICollection<TurnosQuirofano> TurnosQuirofano { get; set; } = new List<TurnosQuirofano>();
+    public virtual ICollection<ConsultasAmbulatorias> ConsultasAmbulatorias { get; set; }
+
 }

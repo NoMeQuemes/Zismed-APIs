@@ -1349,6 +1349,20 @@ public partial class ApplicationDbContext : DbContext
             entity.Property(e => e.VigenciaId).HasColumnName("VigenciaID");
         });
 
+        // Relación entre ConsultasAmbulatorias y Pacientes
+        modelBuilder.Entity<ConsultasAmbulatorias>()
+            .HasOne(c => c.Pacientes)
+            .WithMany(p => p.ConsultasAmbulatorias)
+            .HasForeignKey(c => c.PacienteId)
+            .OnDelete(DeleteBehavior.Restrict); // o lo que necesites
+
+        // Relación entre ConsultasAmbulatorias y DiagnosticosConsultas (como Diagnóstico Principal)
+        modelBuilder.Entity<ConsultasAmbulatorias>()
+            .HasOne(c => c.DiagnosticosConsultas)
+            .WithMany() // Si no hay navegación inversa
+            .HasForeignKey(c => c.DiagnosticoPrincipalId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         modelBuilder.Entity<AdmisionImagenes>(entity =>
         {
             entity.ToTable("Admision_Imagenes");
