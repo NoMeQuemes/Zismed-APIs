@@ -19,6 +19,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(optionsBuilder =>
         .LogTo(Console.WriteLine, LogLevel.Information); //Logger para ver las consultas SQL en la consola (desactivar en producción)
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder.AllowAnyMethod()
+               .AllowAnyHeader()
+               .SetIsOriginAllowed(_ => true) // Permite cualquier origen
+               .AllowCredentials();
+    });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -29,6 +41,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");  // Asegúrate que está antes de UseAuthorization
 
 app.UseAuthorization();
 
