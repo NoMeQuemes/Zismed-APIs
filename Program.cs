@@ -15,6 +15,18 @@ builder.Services.AddDbContext<ApplicationDbContext>(option =>
     option.UseSqlServer(builder.Configuration.GetConnectionString("Connection"));
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CorsPolicy", builder =>
+    {
+        builder.AllowAnyMethod()
+               .AllowAnyHeader()
+               .SetIsOriginAllowed(_ => true) // Permite cualquier origen
+               .AllowCredentials();
+    });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -25,6 +37,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");  // Asegúrate que está antes de UseAuthorization
 
 app.UseAuthorization();
 
