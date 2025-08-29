@@ -188,6 +188,19 @@ namespace Zismed_Apis.Controllers
 
             var pacienteId = guardia.PacienteId;
 
+            // Obtener el nombre del paciente
+            var paciente = await _Db.Pacientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
+
+            if (paciente == null)
+            {
+                return NotFound("Paciente no encontrado.");
+            }
+
+            var pacienteNombre = paciente.Nombre?.Trim();
+            var pacienteDocumento = paciente.Documento?.Trim();
+
             // Optimización de consultas
             var consultas = await _Db.ConsultasAmbulatorias
                 .Include(c => c.Pacientes)
@@ -273,6 +286,8 @@ namespace Zismed_Apis.Controllers
             return Ok(new
             {
                 PacienteID = pacienteId,
+                pacienteNombre = pacienteNombre,
+                pacienteDocumento = pacienteDocumento,
                 RegistroID = registroId,
                 InstitucionID = institucionId,
                 Result = resultDto
