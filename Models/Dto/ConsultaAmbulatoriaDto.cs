@@ -8,6 +8,7 @@
         public int PacienteId { get; set; }
         public int ObraSocialId { get; set; }
         public string? NombreObraSocial { get; set; }
+        public string? PacienteNombre { get; set; }
         public List<DiagnosticosConsultasDto>? Diagnosticos { get; set; }
     }
 }
