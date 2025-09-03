@@ -267,7 +267,7 @@ namespace Zismed_Apis.Controllers
                 .ToList();
 
             // Mapea a DTO  
-            var resultDto = result.Select(c => new ConsultaAmbulatoriaDto
+            var resultDto = result.Select(c => new GetConsultaAmbulatoriaDto
             {
                 ConsultaId = c.ConsultaId,
                 Fecha = c.Fecha,

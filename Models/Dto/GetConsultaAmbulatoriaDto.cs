@@ -1,6 +1,6 @@
 ﻿namespace Zismed_Apis.Models.Dto
 {
-    public class ConsultaAmbulatoriaDto
+    public class GetConsultaAmbulatoriaDto
     {
         public int ConsultaId { get; set; }
         public DateTime Fecha { get; set; }
