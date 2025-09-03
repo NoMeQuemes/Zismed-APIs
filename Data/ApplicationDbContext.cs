@@ -250,8 +250,6 @@ public partial class ApplicationDbContext : DbContext
     public virtual DbSet<DetalleTipoRespuesta> DetalleTipoRespuesta { get; set; }
 
     public virtual DbSet<DiagnosticosConsultas> DiagnosticosConsultas { get; set; }
-    
-    public virtual DbSet<DiagnosticoDto> DiagnosticoDto { get; set; }
 
     public virtual DbSet<DiagnosticosInternado> DiagnosticosInternado { get; set; }
 
@@ -1334,10 +1332,6 @@ public partial class ApplicationDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
-
-        // Configuración para SP con DTO
-        modelBuilder.Entity<DiagnosticoDto>().HasNoKey();
         modelBuilder.Entity<AceptaTerminosCondiciones>(entity =>
         {
             entity.HasKey(e => e.AceptaId);
