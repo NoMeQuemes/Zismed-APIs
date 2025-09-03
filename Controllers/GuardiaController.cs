@@ -27,24 +27,35 @@ namespace Zismed_Apis.Controllers
 
         //Trae todos los pacientes anotados en un sector específico de la guardia
         [HttpGet("pacientePorSector/{id}/")]
-        [ProducesResponseType(typeof(IEnumerable<PacienteGuardiaDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse>> ObtenerPacientesDelSector(int id, CancellationToken ct)
         {
             try
             {
-                // Simulación de obtener el ID de institución desde el contexto del usuario (JWT o Claims)
                 var nombreUsuario = User.Identity?.Name;
-                var idInstitucion = 3; // reemplazar con tu lógica real
+                var idInstitucion = 3; // reemplaza por tu lógica real
 
                 var lista = await _Db.PacienteGuardiaDtos
                     .FromSqlRaw("EXEC sp_PacientesGuardia {0}, {1}, {2}", id, 1, idInstitucion)
                     .ToListAsync(ct);
 
-                _response.Result = lista;
+                // Obtén el valor de "Lugar" del primer paciente (o el valor por default si no hay ninguno)
+                string lugar = lista.FirstOrDefault()?.Lugar ?? "";
+
+
+                // Crea el objeto que contendrá el resultado
+                var result = new
+                {
+                    lugar = lugar,
+                    pacientes = lista
+                };
+
+                _response.Result = result;
                 _response.statusCode = HttpStatusCode.OK;
+                _response.IsExitoso = true;
                 return Ok(_response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener pacientes del sector {SectorId}", id);
                 _response.IsExitoso = false;
@@ -265,6 +276,34 @@ namespace Zismed_Apis.Controllers
                         UsuarioCrea = User.Identity?.Name ?? "Sistema",
                         Anulado = false
                     };
+
+                    await _Db.ConsultasAmbulatorias.AddAsync(consulta);
+                }
+
+                // Guardar en DB
+                await _Db.SaveChangesAsync();
+
+                int idConsulta = consulta.ConsultaId;
+
+                // ➡️ tu lógica de interconsulta sigue acá...
+
+                _response.Result = vistaMedico
+                    ? new { estado = "ok", idConsulta }
+                    : "ok";
+
+                _response.statusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al grabar la consulta ambulatoria");
+                _response.IsExitoso = false;
+                _response.statusCode = HttpStatusCode.InternalServerError;
+                _response.ErrorMessages = new List<string>() { "Error al grabar la consulta ambulatoria.", ex.Message };
+                return StatusCode((int)_response.statusCode, _response);
+            }
+        }
+
         [HttpGet("consultasPorPaciente")]
         public async Task<IActionResult> GetConsultasGuardia(int? registroId, int? institucionId)
         {
@@ -392,32 +431,6 @@ namespace Zismed_Apis.Controllers
             });
         }
 
-                    await _Db.ConsultasAmbulatorias.AddAsync(consulta);
-                }
-
-                // Guardar en DB
-                await _Db.SaveChangesAsync();
-
-                int idConsulta = consulta.ConsultaId;
-
-                // ➡️ tu lógica de interconsulta sigue acá...
-
-                _response.Result = vistaMedico
-                    ? new { estado = "ok", idConsulta }
-                    : "ok";
-
-                _response.statusCode = HttpStatusCode.OK;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al grabar la consulta ambulatoria");
-                _response.IsExitoso = false;
-                _response.statusCode = HttpStatusCode.InternalServerError;
-                _response.ErrorMessages = new List<string>() { "Error al grabar la consulta ambulatoria.", ex.Message };
-                return StatusCode((int)_response.statusCode, _response);
-            }
-        }
         [HttpGet("diagnosticos/search")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDiagnosticosSearch([FromQuery] string query, [FromQuery] bool iosep = false)
