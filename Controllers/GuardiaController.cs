@@ -27,24 +27,35 @@ namespace Zismed_Apis.Controllers
 
         //Trae todos los pacientes anotados en un sector específico de la guardia
         [HttpGet("pacientePorSector/{id}/")]
-        [ProducesResponseType(typeof(IEnumerable<PacienteGuardiaDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<ActionResult<ApiResponse>> ObtenerPacientesDelSector(int id, CancellationToken ct)
         {
             try
             {
-                // Simulación de obtener el ID de institución desde el contexto del usuario (JWT o Claims)
                 var nombreUsuario = User.Identity?.Name;
-                var idInstitucion = 3; // reemplazar con tu lógica real
+                var idInstitucion = 3; // reemplaza por tu lógica real
 
                 var lista = await _Db.PacienteGuardiaDtos
                     .FromSqlRaw("EXEC sp_PacientesGuardia {0}, {1}, {2}", id, 1, idInstitucion)
                     .ToListAsync(ct);
 
-                _response.Result = lista;
+                // Obtén el valor de "Lugar" del primer paciente (o el valor por default si no hay ninguno)
+                string lugar = lista.FirstOrDefault()?.Lugar ?? "";
+
+
+                // Crea el objeto que contendrá el resultado
+                var result = new
+                {
+                    lugar = lugar,
+                    pacientes = lista
+                };
+
+                _response.Result = result;
                 _response.statusCode = HttpStatusCode.OK;
+                _response.IsExitoso = true;
                 return Ok(_response);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "Error al obtener pacientes del sector {SectorId}", id);
                 _response.IsExitoso = false;
@@ -265,132 +276,6 @@ namespace Zismed_Apis.Controllers
                         UsuarioCrea = User.Identity?.Name ?? "Sistema",
                         Anulado = false
                     };
-        [HttpGet("consultasPorPaciente")]
-        public async Task<IActionResult> GetConsultasGuardia(int? registroId, int? institucionId)
-        {
-            // Validación de entrada
-            if (!registroId.HasValue)
-            {
-                return BadRequest("registroId es requerido.");
-            }
-
-            // Obtener el PacienteID sin datos de usuario
-            var guardia = await _Db.GuardiaRegistro
-                .AsNoTracking()
-                .FirstOrDefaultAsync(g => g.GuardiaRegistroId == registroId);
-
-            if (guardia == null)
-            {
-                return NotFound("GuardiaRegistro no encontrado.");
-            }
-
-            var pacienteId = guardia.PacienteId;
-
-            // Obtener el nombre del paciente
-            var paciente = await _Db.Pacientes
-                .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
-
-            if (paciente == null)
-            {
-                return NotFound("Paciente no encontrado.");
-            }
-
-            var pacienteNombre = paciente.Nombre?.Trim();
-            var pacienteDocumento = paciente.Documento?.Trim();
-
-            // Optimización de consultas
-            var consultas = await _Db.ConsultasAmbulatorias
-                .Include(c => c.Pacientes)
-                .Include(c => c.ObraSocial)
-                .Where(c => !c.Anulado && c.PacienteId == pacienteId)
-                .ToListAsync();
-
-            // Recopila y mapea todos los diagnósticos en una sola pasada
-            var todosLosDiagnosticosIds = new HashSet<int>();
-            foreach (var consulta in consultas)
-            {
-                if (consulta.DiagnosticoPrincipalId != 0)
-                {
-                    todosLosDiagnosticosIds.Add(consulta.DiagnosticoPrincipalId);
-                }
-
-                if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
-                {
-                    var idsFromVar = consulta.DiagnosticoPrincipalVar
-                        .Trim().Trim('|')
-                        .Split('|', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(id => int.Parse(id.Trim()));
-
-                    foreach (var id in idsFromVar)
-                    {
-                        todosLosDiagnosticosIds.Add(id);
-                    }
-                }
-            }
-
-            var diagnosticos = await _Db.DiagnosticosConsultas
-                .Where(d => todosLosDiagnosticosIds.Contains(d.DiagnosticosConsultasId))
-                .ToDictionaryAsync(d => d.DiagnosticosConsultasId);
-
-            foreach (var consulta in consultas)
-            {
-                var diagnosticosDeConsulta = new List<DiagnosticosConsultas>();
-                if (diagnosticos.TryGetValue(consulta.DiagnosticoPrincipalId, out var principal))
-                {
-                    diagnosticosDeConsulta.Add(principal);
-                }
-                if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
-                {
-                    var idsFromVar = consulta.DiagnosticoPrincipalVar
-                        .Trim().Trim('|')
-                        .Split('|', StringSplitOptions.RemoveEmptyEntries)
-                        .Select(id => int.Parse(id.Trim()));
-
-                    foreach (var id in idsFromVar)
-                    {
-                        if (diagnosticos.TryGetValue(id, out var diagnostico))
-                        {
-                            diagnosticosDeConsulta.Add(diagnostico);
-                        }
-                    }
-                }
-                consulta.DiagnosticosList = diagnosticosDeConsulta;
-            }
-
-            // Filtra por institución si se proporciona el ID
-            var result = consultas
-                .Where(c => !institucionId.HasValue || c.InstitucionId == institucionId.Value)
-                .OrderByDescending(c => c.ConsultaId)
-                .ToList();
-
-            // Mapea a DTO  
-            var resultDto = result.Select(c => new GetConsultaAmbulatoriaDto
-            {
-                ConsultaId = c.ConsultaId,
-                Fecha = c.Fecha,
-                Evolucion = c.Evolucion,
-                PacienteId = c.PacienteId,
-                ObraSocialId = c.ObraSocialId,
-                NombreObraSocial = c.ObraSocial?.Nombre,
-                Diagnosticos = c.DiagnosticosList?.Select(d => new DiagnosticosConsultasDto
-                {
-                    DiagnosticosConsultasId = d.DiagnosticosConsultasId,
-                    Nombre = d.Nombre
-                }).ToList()
-            }).ToList();
-
-            // Respuesta en formato JSON
-            return Ok(new
-            {
-                PacienteID = pacienteId,
-                pacienteNombre = pacienteNombre,
-                pacienteDocumento = pacienteDocumento,
-                RegistroID = registroId,
-                InstitucionID = institucionId,
-                Result = resultDto
-            });
-        }
 
                     await _Db.ConsultasAmbulatorias.AddAsync(consulta);
                 }
@@ -418,6 +303,161 @@ namespace Zismed_Apis.Controllers
                 return StatusCode((int)_response.statusCode, _response);
             }
         }
+
+        [HttpGet("consultasPorPaciente")]
+        public async Task<IActionResult> GetConsultasGuardia(int? registroId, int? institucionId)
+        {
+            try
+            {
+                // Validación de entrada
+                if (!registroId.HasValue)
+                {
+                    return BadRequest("registroId es requerido.");
+                }
+
+                // Obtener el PacienteID sin datos de usuario
+                var guardia = await _Db.GuardiaRegistro
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(g => g.GuardiaRegistroId == registroId);
+
+                if (guardia == null)
+                {
+                    return NotFound("GuardiaRegistro no encontrado.");
+                }
+
+                var pacienteId = guardia.PacienteId;
+
+                // Obtener el nombre del paciente
+                var paciente = await _Db.Pacientes
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.PacienteId == pacienteId);
+
+                if (paciente == null)
+                {
+                    return NotFound("Paciente no encontrado.");
+                }
+
+                var pacienteNombre = paciente.Nombre?.Trim();
+                var pacienteDocumento = paciente.Documento?.Trim();
+
+                // Optimización de consultas
+                var consultas = await _Db.ConsultasAmbulatorias
+                    .Include(c => c.Pacientes)
+                    .Include(c => c.ObraSocial)
+                    .Where(c => !c.Anulado && c.PacienteId == pacienteId)
+                    .ToListAsync();
+
+                // Recopila y mapea todos los diagnósticos en una sola pasada
+                var todosLosDiagnosticosIds = new HashSet<int>();
+                foreach (var consulta in consultas)
+                {
+                    if (consulta.DiagnosticoPrincipalId != 0)
+                    {
+                        todosLosDiagnosticosIds.Add(consulta.DiagnosticoPrincipalId);
+                    }
+
+                    if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
+                    {
+                        var idsFromVar = consulta.DiagnosticoPrincipalVar
+                            .Trim().Trim('|')
+                            .Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var idStr in idsFromVar)
+                        {
+                            if (int.TryParse(idStr.Trim(), out int id))
+                            {
+                                todosLosDiagnosticosIds.Add(id);
+                            }
+                            // Si querés registrar los que no son numéricos, agregá un log acá
+                        }
+                    }
+                }
+
+                var diagnosticos = await _Db.DiagnosticosConsultas
+                    .Where(d => todosLosDiagnosticosIds.Contains(d.DiagnosticosConsultasId))
+                    .ToDictionaryAsync(d => d.DiagnosticosConsultasId);
+
+                foreach (var consulta in consultas)
+                {
+                    var diagnosticosDeConsulta = new List<DiagnosticosConsultas>();
+                    if (diagnosticos.TryGetValue(consulta.DiagnosticoPrincipalId, out var principal))
+                    {
+                        diagnosticosDeConsulta.Add(principal);
+                    }
+                    if (!string.IsNullOrWhiteSpace(consulta.DiagnosticoPrincipalVar))
+                    {
+                        var idsFromVar = consulta.DiagnosticoPrincipalVar
+                            .Trim().Trim('|')
+                            .Split('|', StringSplitOptions.RemoveEmptyEntries);
+
+                        foreach (var idStr in idsFromVar)
+                        {
+                            if (int.TryParse(idStr.Trim(), out int id))
+                            {
+                                if (diagnosticos.TryGetValue(id, out var diagnostico))
+                                {
+                                    diagnosticosDeConsulta.Add(diagnostico);
+                                }
+                            }
+                            // Si querés registrar los que no son numéricos, agregá un log acá
+                        }
+                    }
+                    consulta.DiagnosticosList = diagnosticosDeConsulta;
+                }
+
+                // Filtra por institución si se proporciona el ID
+                var result = consultas
+                    .Where(c => !institucionId.HasValue || c.InstitucionId == institucionId.Value)
+                    .OrderByDescending(c => c.ConsultaId)
+                    .ToList();
+
+                // Mapea a DTO  
+                var resultDto = result.Select(c => new GetConsultaAmbulatoriaDto
+                {
+                    ConsultaId = c.ConsultaId,
+                    Fecha = c.Fecha,
+                    Evolucion = c.Evolucion,
+                    PacienteId = c.PacienteId,
+                    ObraSocialId = c.ObraSocialId,
+                    NombreObraSocial = c.ObraSocial?.Nombre,
+                    Diagnosticos = c.DiagnosticosList?.Select(d => new DiagnosticosConsultasDto
+                    {
+                        DiagnosticosConsultasId = d.DiagnosticosConsultasId,
+                        Nombre = d.Nombre
+                    }).ToList()
+                }).ToList();
+
+                // Respuesta en formato JSON
+                return Ok(new
+                {
+                    PacienteID = pacienteId,
+                    pacienteNombre = pacienteNombre,
+                    pacienteDocumento = pacienteDocumento,
+                    RegistroID = registroId,
+                    InstitucionID = institucionId,
+                    Result = resultDto
+                });
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                _logger.LogError(ex, "Error al obtener las consultas de guardia para el registro {RegistroId}", registroId);
+
+                var response = new ApiResponse
+                {
+                    IsExitoso = false,
+                    statusCode = HttpStatusCode.InternalServerError,
+                    ErrorMessages = new List<string>
+            {
+                "Ocurrió un error al procesar la solicitud.",
+                ex.Message
+            }
+                };
+
+                return StatusCode((int)response.statusCode, response);
+            }
+        }
+
         [HttpGet("diagnosticos/search")]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
         public async Task<IActionResult> GetDiagnosticosSearch([FromQuery] string query, [FromQuery] bool iosep = false)
