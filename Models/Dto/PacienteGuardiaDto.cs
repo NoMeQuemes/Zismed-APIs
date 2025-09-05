@@ -14,6 +14,7 @@ namespace Zismed_Apis.Models.Dto
 
         public int GuardiaRegistroID { get; set; }
         public string PacienteNombre { get; set; }
+        public string PacienteDocumento { get; set; }
         public string FechaIngreso { get; set; }
         public string PrestadorRecibe { get; set; }
         public string Lugar { get; set; }
