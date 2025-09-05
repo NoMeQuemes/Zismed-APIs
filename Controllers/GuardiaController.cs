@@ -339,6 +339,7 @@ namespace Zismed_Apis.Controllers
 
                 var pacienteNombre = paciente.Nombre?.Trim();
                 var pacienteDocumento = paciente.Documento?.Trim();
+                var pacienteFechaNacimiento = paciente.FechadeNacimiento;
 
                 // Optimización de consultas
                 var consultas = await _Db.ConsultasAmbulatorias
@@ -433,6 +434,7 @@ namespace Zismed_Apis.Controllers
                     PacienteID = pacienteId,
                     pacienteNombre = pacienteNombre,
                     pacienteDocumento = pacienteDocumento,
+                    pacienteFechaNacimiento = pacienteFechaNacimiento,
                     RegistroID = registroId,
                     InstitucionID = institucionId,
                     Result = resultDto
