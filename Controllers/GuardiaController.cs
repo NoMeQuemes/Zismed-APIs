@@ -420,6 +420,10 @@ namespace Zismed_Apis.Controllers
                     PacienteId = c.PacienteId,
                     ObraSocialId = c.ObraSocialId,
                     NombreObraSocial = c.ObraSocial?.Nombre,
+                    TurnoID = c.TurnoId,
+                    GuardiaRegistroID = c.GuardiaRegistroId,
+                    CamaId = c.CamaId,
+                    InterconsultaID = c.InterconsultaId,
                     Diagnosticos = c.DiagnosticosList?.Select(d => new DiagnosticosConsultasDto
                     {
                         DiagnosticosConsultasId = d.DiagnosticosConsultasId,

@@ -9,6 +9,10 @@
         public int ObraSocialId { get; set; }
         public string? NombreObraSocial { get; set; }
         public string? PacienteNombre { get; set; }
+        public int? TurnoID { get; set; }
+        public int? GuardiaRegistroID { get; set; }
+        public int? InterconsultaID { get; set; }
+        public int? CamaId { get; set; }
         public List<DiagnosticosConsultasDto>? Diagnosticos { get; set; }
     }
 }
