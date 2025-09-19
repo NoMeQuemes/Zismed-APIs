@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.Net;
 using Zismed_Apis.Data;
 using Zismed_Apis.Models;
@@ -194,118 +195,7 @@ namespace Zismed_Apis.Controllers
             });
         }
 
-        [HttpPost("consulta")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GrabaConsultaHidden([FromBody] ConsultaAmbulatoriaDto dto, [FromQuery] bool vistaMedico = true)
-        {
-            try
-            {
-                ConsultasAmbulatorias consulta;
 
-                if (dto.ConsultaId > 0)
-                {
-                    // 📝 Actualizar una consulta existente
-                    consulta = await _Db.ConsultasAmbulatorias
-                        .FirstOrDefaultAsync(c => c.ConsultaId == dto.ConsultaId);
-
-                    if (consulta == null)
-                    {
-                        _response.IsExitoso = false;
-                        _response.statusCode = HttpStatusCode.NotFound;
-                        _response.ErrorMessages = new List<string>() { "Consulta no encontrada para actualizar." };
-                        return NotFound(_response);
-                    }
-
-                    // ➡️ Actualizar las propiedades de la entidad existente
-                    consulta.PacienteId = dto.PacienteId;
-                    consulta.TurnoId = dto.TurnoId;
-                    consulta.GuardiaRegistroId = dto.GuardiaRegistroId;
-                    consulta.GuardiaSectorId = dto.GuardiaSectorId;
-                    consulta.InterconsultaId = dto.InterconsultaId;
-                    consulta.CamaId = dto.CamaId;
-                    consulta.PrestadorId = dto.PrestadorId;
-                    consulta.ServicioId = dto.ServicioId;
-                    consulta.DiagnosticoPrincipalId = dto.DiagnosticoPrincipalId;
-                    consulta.DiagnosticoSecundarioId = dto.DiagnosticoSecundarioId;
-                    consulta.Evolucion = dto.Evolucion;
-                    consulta.ObraSocialId = dto.ObraSocialId;
-                    consulta.Presuntivo = dto.Presuntivo;
-                    consulta.Prescripcion = dto.Prescripcion;
-                    consulta.Visible = dto.Visible;
-                    consulta.InstitucionId = dto.InstitucionId;
-                    consulta.Indicacion = dto.Indicacion;
-                    consulta.ConsultaIdoriginal = dto.ConsultaIdoriginal;
-                    consulta.Psiquiatrico = dto.Psiquiatrico;
-                    consulta.MigradoJardin = dto.MigradoJardin;
-                    consulta.DiagnosticoSnomed = dto.DiagnosticoSnomed;
-                    consulta.Informe = dto.Informe;
-                    consulta.DiagnosticoPrincipalVar = dto.DiagnosticoPrincipalVar;
-
-                    // La fecha de creación y el usuario creador no se modifican en una actualización
-                    _Db.ConsultasAmbulatorias.Update(consulta);
-                }
-                else
-                {
-                    // 📝 Crear una nueva consulta
-                    consulta = new ConsultasAmbulatorias
-                    {
-                        PacienteId = dto.PacienteId,
-                        TurnoId = dto.TurnoId,
-                        GuardiaRegistroId = dto.GuardiaRegistroId,
-                        GuardiaSectorId = dto.GuardiaSectorId,
-                        InterconsultaId = dto.InterconsultaId,
-                        CamaId = dto.CamaId,
-                        PrestadorId = dto.PrestadorId,
-                        ServicioId = dto.ServicioId,
-                        DiagnosticoPrincipalId = dto.DiagnosticoPrincipalId,
-                        DiagnosticoSecundarioId = dto.DiagnosticoSecundarioId,
-                        Evolucion = dto.Evolucion,
-                        ObraSocialId = dto.ObraSocialId,
-                        Presuntivo = dto.Presuntivo,
-                        Prescripcion = dto.Prescripcion,
-                        Visible = dto.Visible,
-                        InstitucionId = dto.InstitucionId,
-                        Indicacion = dto.Indicacion,
-                        ConsultaIdoriginal = dto.ConsultaIdoriginal,
-                        Psiquiatrico = dto.Psiquiatrico,
-                        MigradoJardin = dto.MigradoJardin,
-                        DiagnosticoSnomed = dto.DiagnosticoSnomed,
-                        Informe = dto.Informe,
-                        DiagnosticoPrincipalVar = dto.DiagnosticoPrincipalVar,
-
-                        // 🔹 Estos los setea siempre el backend solo en la creación
-                        FechaCrea = DateTime.Now,
-                        Fecha = DateTime.Now,
-                        UsuarioCrea = User.Identity?.Name ?? "Sistema",
-                        Anulado = false
-                    };
-
-                    await _Db.ConsultasAmbulatorias.AddAsync(consulta);
-                }
-
-                // Guardar en DB
-                await _Db.SaveChangesAsync();
-
-                int idConsulta = consulta.ConsultaId;
-
-                // ➡️ tu lógica de interconsulta sigue acá...
-
-                _response.Result = vistaMedico
-                    ? new { estado = "ok", idConsulta }
-                    : "ok";
-
-                _response.statusCode = HttpStatusCode.OK;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al grabar la consulta ambulatoria");
-                _response.IsExitoso = false;
-                _response.statusCode = HttpStatusCode.InternalServerError;
-                _response.ErrorMessages = new List<string>() { "Error al grabar la consulta ambulatoria.", ex.Message };
-                return StatusCode((int)_response.statusCode, _response);
-            }
-        }
 
         [HttpGet("consultasPorPaciente")]
         public async Task<IActionResult> GetConsultasGuardia(int? registroId, int? institucionId)
@@ -446,6 +336,7 @@ namespace Zismed_Apis.Controllers
                 // Respuesta en formato JSON
                 return Ok(new
                 {
+                    prestadorID = 5303,
                     PacienteID = pacienteId,
                     pacienteNombre = pacienteNombre,
                     pacienteDocumento = pacienteDocumento,
@@ -476,58 +367,6 @@ namespace Zismed_Apis.Controllers
             }
         }
 
-        [HttpGet("diagnosticos/search")]
-        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-        public async Task<IActionResult> GetDiagnosticosSearch([FromQuery] string query, [FromQuery] bool iosep = false)
-        {
-            try
-            {
-                query = query?.ToUpper() ?? "";
-
-                // Preparamos hasta 4 palabras
-                string[] list = new string[4] { "", "", "", "" };
-                var list2 = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-                for (var i = 0; i < list2.Length && i < 4; i++)
-                {
-                    list[i] = list2[i];
-                }
-
-                // Si hay más de 4 palabras, se acumulan en la última posición
-                var x = 4;
-                while (list2.Length > x)
-                {
-                    list[3] += " " + list2[x];
-                    x++;
-                }
-
-                int tipo = iosep ? 2 : 0;
-
-                // Ejecutar SP con EF Core
-                var result = await _Db.DiagnosticoDto
-                    .FromSqlRaw("EXEC SP_ConsultaDiagnosticos @Tipo, @Query1",
-                        new Microsoft.Data.SqlClient.SqlParameter("@Tipo", tipo),
-                        new Microsoft.Data.SqlClient.SqlParameter("@Query1", list[0])
-                        //new Microsoft.Data.SqlClient.SqlParameter("@Query2", list[1]),
-                        //new Microsoft.Data.SqlClient.SqlParameter("@Query3", list[2]),
-                        //new Microsoft.Data.SqlClient.SqlParameter("@Query4", list[3])
-                    )
-                    .ToListAsync();
-
-                _response.Result = result;
-                _response.statusCode = HttpStatusCode.OK;
-                return Ok(_response);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error al buscar diagnósticos con query {Query}", query);
-                _response.IsExitoso = false;
-                _response.statusCode = HttpStatusCode.InternalServerError;
-                _response.ErrorMessages = new List<string>() { "Error al buscar diagnósticos.", ex.Message };
-                return StatusCode((int)_response.statusCode, _response);
-            }
-        }
-
         public class ListadoGuardia
         {
             public int GuardiaRegistroID { get; set; }
@@ -550,35 +389,7 @@ namespace Zismed_Apis.Controllers
 
             public string AnamnesisNombre { get; set; }
         }
-        public class ConsultaAmbulatoriaDto
-        {
-            public int? ConsultaId { get; set; }   // lo dejo opcional por si es update
-            public int PacienteId { get; set; }
-            public int? TurnoId { get; set; }
-            public int? GuardiaRegistroId { get; set; }
-            public int? GuardiaSectorId { get; set; }
-            public int? InterconsultaId { get; set; }
-            public int? CamaId { get; set; }
-            public int PrestadorId { get; set; }
-            public int? ServicioId { get; set; }
-            public DateTime? Fecha { get; set; }   // opcional, porque la API puede sobreescribir
-            public int DiagnosticoPrincipalId { get; set; }
-            public int DiagnosticoSecundarioId { get; set; }
-            public string? Evolucion { get; set; }
-            public int ObraSocialId { get; set; }
-            public string? Presuntivo { get; set; }
-            public string? Prescripcion { get; set; }
-            public bool? Visible { get; set; }
-            public int? InstitucionId { get; set; }
-            public string? Indicacion { get; set; }
-            public int? ConsultaIdoriginal { get; set; }
-            public bool? Psiquiatrico { get; set; }
-            public bool? MigradoJardin { get; set; }
-            public int? DiagnosticoSnomed { get; set; }
-            public string? Informe { get; set; }
-            public string? DiagnosticoPrincipalVar { get; set; }
-        }
-
+        
         //Métodos para derivación iterna
 
         [HttpGet("DerivacionInternaGet/{idGuardiaRegistro}/{UsusarioLogueadoId}")]
@@ -886,6 +697,525 @@ namespace Zismed_Apis.Controllers
 
             public bool TieneCamas { get; set; } = false;
 
+        }
+
+        //------------------------------------------------------------------------------------------------------------------------------------------
+        [HttpPost("consulta")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GrabaConsultaHidden([FromBody] ConsultaAmbulatoriaDto dto, [FromQuery] bool vistaMedico = true)
+        {
+            try
+            {
+                ConsultasAmbulatorias consulta;
+
+                if (dto.ConsultaId > 0)
+                {
+                    // 📝 Actualizar una consulta existente
+                    consulta = await _Db.ConsultasAmbulatorias
+                        .FirstOrDefaultAsync(c => c.ConsultaId == dto.ConsultaId);
+
+                    if (consulta == null)
+                    {
+                        _response.IsExitoso = false;
+                        _response.statusCode = HttpStatusCode.NotFound;
+                        _response.ErrorMessages = new List<string>() { "Consulta no encontrada para actualizar." };
+                        return NotFound(_response);
+                    }
+
+                    // ➡️ Actualizar las propiedades de la entidad existente
+                    consulta.PacienteId = dto.PacienteId;
+                    consulta.TurnoId = dto.TurnoId;
+                    consulta.GuardiaRegistroId = dto.GuardiaRegistroId;
+                    consulta.GuardiaSectorId = dto.GuardiaSectorId;
+                    consulta.InterconsultaId = dto.InterconsultaId;
+                    consulta.CamaId = dto.CamaId;
+                    consulta.PrestadorId = dto.PrestadorId;
+                    consulta.ServicioId = dto.ServicioId;
+                    consulta.DiagnosticoPrincipalId = dto.DiagnosticoPrincipalId;
+                    consulta.DiagnosticoSecundarioId = dto.DiagnosticoSecundarioId;
+                    consulta.Evolucion = dto.Evolucion;
+                    consulta.ObraSocialId = dto.ObraSocialId;
+                    consulta.Presuntivo = dto.Presuntivo;
+                    consulta.Prescripcion = dto.Prescripcion;
+                    consulta.Visible = dto.Visible;
+                    consulta.InstitucionId = dto.InstitucionId;
+                    consulta.Indicacion = dto.Indicacion;
+                    consulta.ConsultaIdoriginal = dto.ConsultaIdoriginal;
+                    consulta.Psiquiatrico = dto.Psiquiatrico;
+                    consulta.MigradoJardin = dto.MigradoJardin;
+                    consulta.DiagnosticoSnomed = dto.DiagnosticoSnomed;
+                    consulta.Informe = dto.Informe;
+                    consulta.DiagnosticoPrincipalVar = dto.DiagnosticoPrincipalVar;
+
+                    // La fecha de creación y el usuario creador no se modifican en una actualización
+                    _Db.ConsultasAmbulatorias.Update(consulta);
+                }
+                else
+                {
+                    // 📝 Crear una nueva consulta
+                    consulta = new ConsultasAmbulatorias
+                    {
+                        PacienteId = dto.PacienteId,
+                        TurnoId = dto.TurnoId,
+                        GuardiaRegistroId = dto.GuardiaRegistroId,
+                        GuardiaSectorId = dto.GuardiaSectorId,
+                        InterconsultaId = dto.InterconsultaId,
+                        CamaId = dto.CamaId,
+                        PrestadorId = dto.PrestadorId,
+                        ServicioId = dto.ServicioId,
+                        DiagnosticoPrincipalId = dto.DiagnosticoPrincipalId,
+                        DiagnosticoSecundarioId = dto.DiagnosticoSecundarioId,
+                        Evolucion = dto.Evolucion,
+                        ObraSocialId = dto.ObraSocialId,
+                        Presuntivo = dto.Presuntivo,
+                        Prescripcion = dto.Prescripcion,
+                        Visible = dto.Visible,
+                        InstitucionId = dto.InstitucionId,
+                        Indicacion = dto.Indicacion,
+                        ConsultaIdoriginal = dto.ConsultaIdoriginal,
+                        Psiquiatrico = dto.Psiquiatrico,
+                        MigradoJardin = dto.MigradoJardin,
+                        DiagnosticoSnomed = dto.DiagnosticoSnomed,
+                        Informe = dto.Informe,
+                        DiagnosticoPrincipalVar = dto.DiagnosticoPrincipalVar,
+
+                        // 🔹 Estos los setea siempre el backend solo en la creación
+                        FechaCrea = DateTime.Now,
+                        Fecha = DateTime.Now,
+                        UsuarioCrea = User.Identity?.Name ?? "Sistema",
+                        Anulado = false
+                    };
+
+                    await _Db.ConsultasAmbulatorias.AddAsync(consulta);
+                }
+
+                // Guardar en DB
+                await _Db.SaveChangesAsync();
+
+                int idConsulta = consulta.ConsultaId;
+
+                // ➡️ tu lógica de interconsulta sigue acá...
+
+                _response.Result = vistaMedico
+                    ? new { estado = "ok", idConsulta }
+                    : "ok";
+
+                _response.statusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al grabar la consulta ambulatoria");
+                _response.IsExitoso = false;
+                _response.statusCode = HttpStatusCode.InternalServerError;
+                _response.ErrorMessages = new List<string>() { "Error al grabar la consulta ambulatoria.", ex.Message };
+                return StatusCode((int)_response.statusCode, _response);
+            }
+        }
+        [HttpGet("diagnosticos/search")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetDiagnosticosSearch([FromQuery] string query, [FromQuery] bool iosep = false)
+        {
+            try
+            {
+                query = query?.ToUpper() ?? "";
+
+                // Preparamos hasta 4 palabras
+                string[] list = new string[4] { "", "", "", "" };
+                var list2 = query.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                for (var i = 0; i < list2.Length && i < 4; i++)
+                {
+                    list[i] = list2[i];
+                }
+
+                // Si hay más de 4 palabras, se acumulan en la última posición
+                var x = 4;
+                while (list2.Length > x)
+                {
+                    list[3] += " " + list2[x];
+                    x++;
+                }
+
+                int tipo = iosep ? 2 : 0;
+
+                // Ejecutar SP con EF Core
+                var result = await _Db.DiagnosticoDto
+                    .FromSqlRaw("EXEC SP_ConsultaDiagnosticos @Tipo, @Query1",
+                        new Microsoft.Data.SqlClient.SqlParameter("@Tipo", tipo),
+                        new Microsoft.Data.SqlClient.SqlParameter("@Query1", list[0])
+                    //new Microsoft.Data.SqlClient.SqlParameter("@Query2", list[1]),
+                    //new Microsoft.Data.SqlClient.SqlParameter("@Query3", list[2]),
+                    //new Microsoft.Data.SqlClient.SqlParameter("@Query4", list[3])
+                    )
+                    .ToListAsync();
+
+                _response.Result = result;
+                _response.statusCode = HttpStatusCode.OK;
+                return Ok(_response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al buscar diagnósticos con query {Query}", query);
+                _response.IsExitoso = false;
+                _response.statusCode = HttpStatusCode.InternalServerError;
+                _response.ErrorMessages = new List<string>() { "Error al buscar diagnósticos.", ex.Message };
+                return StatusCode((int)_response.statusCode, _response);
+            }
+        }
+        [HttpGet("GetMedicacionVias")]
+        public IActionResult GetMedicacionVias()
+        {
+            var vias = _Db.MedicacionVia
+                .Where(w => !w.MedicacionContinua && !w.Anulado && w.VistaMedico)
+                .OrderBy(r => r.Nombre)
+                .Select(r => new
+                {
+                    r.MedicacionViaId,
+                    r.Nombre
+                })
+                .ToList();
+
+            return Ok(vias);
+        }
+        [HttpGet("BuscarMedicamentos")]
+        public IActionResult BuscarMedicamentos(string query, int institucionId = 0, bool vistaMedico = false)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+                return Ok(new List<object>());
+
+            var resultados = _Db.FarmaciaArticuloDeposito
+                .Include(f => f.FarmaciaArticulo)  // <-- asegurate de tener using System.Data.Entity;
+                .Where(w => w.FarmaciaArticulo.Nombre.Contains(query))
+                .OrderBy(r => r.FarmaciaArticulo.Nombre)
+                .Select(r => new
+                {
+                    value = r.FarmaciaArticuloId,             // ID del medicamento
+                    label = r.FarmaciaArticulo.Nombre     // Nombre para mostrar
+                })
+                .Take(20) // limitar resultados
+                .ToList();
+
+            return Ok(resultados);
+        }
+        [HttpPost("GuardarIndicaciones")]
+        public IActionResult GuardarIndicaciones([FromBody] GuardarIndicacionesRequest request)
+        {
+            if (string.IsNullOrEmpty(request.JsonDetalle) || request.JsonDetalle == "[]")
+            {
+                return Ok(new { success = false, message = "No hay indicaciones para guardar" });
+            }
+
+            var fechaAhora = DateTime.Now;
+
+            // Deserializar JSON
+            List<MedicacionPacienteDetalleView> listaDetalle =
+                JsonConvert.DeserializeObject<List<MedicacionPacienteDetalleView>>(request.JsonDetalle);
+            try
+            {
+                // Crear cabecera de medicación
+                var medicacionPaciente = new MedicacionPaciente
+                {
+                    ConsultaId = request.ConsultaId,
+                    FechaCrea = fechaAhora,
+                    UsuarioCrea = User?.Identity?.Name ?? "system",
+                    Anulado = false,
+                    Tipo = "DISCRETA",
+                    TipoEstadoMedicacionId = request.VistaMedico ? 1 : 4, // 1 = Aplicada, 4 = Pendiente
+                    PacienteId = request.idPacinete,
+                    PrestadorPrescribeId = request.idPrestadorIndica,
+                    GuardiaRegistroId = request.guardiaRegistroId,
+                    GuardiaSectorId = request.GuardiaSectorId,
+                    TurnoId = 0,
+                    MedicacionViaId = 0,
+                    FechaPrescribe = fechaAhora,
+
+                };
+
+                foreach (var itemDet in listaDetalle)
+                {
+                    var objMedPDet = new MedicacionPacienteDetalle
+                    {
+                        FarmaciaArticuloId = itemDet.FarmaciaArticuloID,
+                        NuevaDro = itemDet.NuevaDro == 0 ? null : itemDet.NuevaDro,
+                        MultiDro = itemDet.MultiDro == 0 ? null : itemDet.MultiDro,
+                        TipoEstadoMedicacionPacienteDetalleId = request.VistaMedico ? 1 : 4,
+                        ArticuloNombre = itemDet.ArticuloNombre,
+                        ArticuloPresentacion = itemDet.ArticuloPresentacion,
+                        ArticuloDroga = itemDet.ArticuloDroga,
+                        Cantidad = itemDet.Cantidad,
+                        FechaCrea = fechaAhora,
+                        UsuarioCrea = "",
+                        UsuarioAplica = request.VistaMedico ? null : "",
+                        Anulado = false,
+                        Tipo = request.VistaMedico ? "MEDICAMENTO" : "ARTICULO",
+                        ViaTipoId = itemDet.ViaTipoID,
+                        ObservacionMedico = itemDet.ObservacionMedico,
+                        EnfermeroAplicaId = request.IdEnfermero,
+                        ConsultaId = request.ConsultaId
+                    };
+
+                    medicacionPaciente.MedicacionPacienteDetalle.Add(objMedPDet);
+                }
+
+                _Db.MedicacionPaciente.Add(medicacionPaciente);
+                _Db.SaveChanges();
+
+                // Guardar histórico
+                var objMedPHis = new MedicacionPacienteHistorico
+                {
+                    MedicacionPacienteId = medicacionPaciente.MedicacionPacienteId,
+                    Accion = "APLICADA",
+                    Fecha = fechaAhora,
+                    Usuario = "",
+                    Anulado = false
+                };
+
+                _Db.MedicacionPacienteHistorico.Add(objMedPHis);
+                _Db.SaveChanges();
+
+                //scope.Complete();
+
+                return Ok(new { success = true, message = "Indicaciones guardadas correctamente", id = medicacionPaciente.MedicacionPacienteId });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, message = "Error al guardar indicaciones", error = ex.Message });
+            }
+
+            return Ok(new { success = true });
+        }
+        [HttpPost("SalidaGuardiaGral")]
+        public IActionResult SalidaGuardiaGral([FromBody] GuardarSalidaRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return Ok(new { ok = false, message = "Datos inválidos" });
+                }
+
+                var fechaAhora = DateTime.Now;
+                var guardiaDerivacionExterna = new GuardiaDerivacionExterna
+                {
+                    GuardiaRegistroId = request.GuardiaRegistroId,
+                    PrestadorId = request.PrestadorId,
+                    GuardiaSectorId = request.GuardiaSectorId,
+                    Fecha = request.Fecha,
+                    Motivo = request.Motivo,
+                    Usuario = "",
+                    Anulado = false,
+                    FechaCrea = fechaAhora,
+                };
+                // completar datos obligatorios
+
+                // Guardar en la base
+                _Db.GuardiaDerivacionExterna.Add(guardiaDerivacionExterna);
+                _Db.SaveChanges();
+
+                // Opcional: actualizar GuardiaRegistro (si corresponde)
+                var objGuardiaReg = _Db.GuardiaRegistro
+                    .FirstOrDefault(g => g.GuardiaRegistroId == guardiaDerivacionExterna.GuardiaRegistroId);
+
+                if (objGuardiaReg != null)
+                {
+                    objGuardiaReg.TipoAltaId = request.TipoAltaID;
+                    objGuardiaReg.PrestadorEgresoId = guardiaDerivacionExterna.PrestadorId;
+                    objGuardiaReg.FechaEgreso = guardiaDerivacionExterna.Fecha;
+                    objGuardiaReg.UsuarioEgreso = "";
+                    objGuardiaReg.FechaModifica = fechaAhora;
+
+                    _Db.Entry(objGuardiaReg).State = EntityState.Modified;
+                    _Db.SaveChanges();
+                }
+
+                // devolver solo un OK para Vue
+                return Ok(new { ok = true });
+            }
+            catch (Exception ex)
+            {
+                // log interno
+                System.Diagnostics.Debug.WriteLine("Error en SalidaGuardiaGral: " + ex.Message);
+
+                return Ok(new { ok = false, message = "Error al procesar la salida de guardia" });
+            }
+        }
+        [HttpGet("GetPrestadoresAlta/{idGuardiaRegistro}")]
+        public IActionResult GetPrestadoresAlta(int idGuardiaRegistro)
+        {
+            try
+            {
+                var usuario = "27357388827";
+
+                // Obtener el usuario
+                var user = _Db.AspNetUsers.FirstOrDefault(l => l.UserName == usuario);
+                if (user == null)
+                    return BadRequest(new { success = false, message = "Usuario no encontrado" });
+
+                var claim = _Db.AspNetUserClaims
+                    .FirstOrDefault(u => u.UserId == user.Id && u.ClaimType == "PrestadorID");
+
+                int claimUser = 0;
+
+                // Si no tiene claim o es 0 → buscar "Sin Asignar"
+                if (claim == null || claim.ClaimValue == "0")
+                {
+                    var prest = _Db.Prestadores
+                        .Where(p => !p.Anulado && p.Nombre.Contains("Sin Asignar"))
+                        .FirstOrDefault();
+
+                    claimUser = prest != null ? prest.PrestadorId : 0;
+                }
+                else
+                {
+                    claimUser = Convert.ToInt32(claim.ClaimValue);
+                }
+
+                // Si sigue en 0 → buscar del historial de derivaciones
+                if (claimUser == 0)
+                {
+                    var prestadorDeriva = _Db.GuardiaDerivacionInterna
+                        .Where(p => !p.Anulado && p.GuardiaRegistroId == idGuardiaRegistro)
+                        .OrderByDescending(p => p.FechaCrea)
+                        .FirstOrDefault();
+
+                    claimUser = prestadorDeriva != null ? prestadorDeriva.PrestadorId : 0;
+                }
+
+                // Buscar la institución del registro
+                var objGuardiaRegBD = _Db.GuardiaRegistro
+                    .FirstOrDefault(a => a.GuardiaRegistroId == idGuardiaRegistro && !a.Anulado);
+
+                if (objGuardiaRegBD == null)
+                    return BadRequest(new { success = false, message = "Guardia no encontrada" });
+
+                // Lista de prestadores
+                var prestadores = _Db.Prestadores
+                    .Where(r => !r.Anulado && r.InstitucionId == objGuardiaRegBD.InstitucionId)
+                    .OrderBy(r => r.Nombre)
+                    .Select(r => new
+                    {
+                        r.PrestadorId,
+                        Nombre = r.Matricula + " - " + r.Nombre
+                    })
+                    .ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    prestadores,
+                    selected = claimUser
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { success = false, message = "Error al obtener prestadores", error = ex.Message });
+            }
+        }
+        [HttpGet("GetTiposAlta")]
+        public IActionResult GetTiposAlta()
+        {
+            try
+            {
+                var tiposAlta = _Db.TipoAltaIntenado
+                    .Where(p => !p.Anulado && p.TipoAltaId != 11)
+                    .OrderBy(p => p.Nombre)
+                    .Select(p => new
+                    {
+                        p.TipoAltaId,
+                        p.Nombre
+                    })
+                    .ToList();
+
+                return Ok(new
+                {
+                    success = true,
+                    tiposAlta
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = "Error al obtener tipos de alta",
+                    error = ex.Message
+                });
+            }
+        }
+
+        public class MedicacionPacienteDetalleView
+        {
+            public int MedicacionPacienteDetalleID { get; set; }
+            public int MedicacionPacienteID { get; set; }
+            public int? FarmaciaArticuloID { get; set; }
+            public int? NuevaDro { get; set; }
+            public int? MultiDro { get; set; }
+            public int TipoEstadoMedicacionPacienteDetalleID { get; set; }
+            public string ArticuloNombre { get; set; }
+            public string ArticuloPresentacion { get; set; }
+            public string ArticuloDroga { get; set; }
+            public decimal Cantidad { get; set; }
+            public int Nuevo { get; set; }
+            public int Editado { get; set; }
+            public int Anulado { get; set; }
+            public int? ViaTipoID { get; set; }
+            public string Tipo { get; set; }
+            public string ObservacionMedico { get; set; }
+            public string ObservacionEnfermero { get; set; }
+            public string ObservacionRevierte { get; set; }
+
+        }
+
+        public class ConsultaAmbulatoriaDto
+        {
+            public int? ConsultaId { get; set; }   // lo dejo opcional por si es update
+            public int PacienteId { get; set; }
+            public int? TurnoId { get; set; }
+            public int? GuardiaRegistroId { get; set; }
+            public int? GuardiaSectorId { get; set; }
+            public int? InterconsultaId { get; set; }
+            public int? CamaId { get; set; }
+            public int PrestadorId { get; set; }
+            public int? ServicioId { get; set; }
+            public DateTime? Fecha { get; set; }   // opcional, porque la API puede sobreescribir
+            public int DiagnosticoPrincipalId { get; set; }
+            public int DiagnosticoSecundarioId { get; set; }
+            public string? Evolucion { get; set; }
+            public int ObraSocialId { get; set; }
+            public string? Presuntivo { get; set; }
+            public string? Prescripcion { get; set; }
+            public bool? Visible { get; set; }
+            public int? InstitucionId { get; set; }
+            public string? Indicacion { get; set; }
+            public int? ConsultaIdoriginal { get; set; }
+            public bool? Psiquiatrico { get; set; }
+            public bool? MigradoJardin { get; set; }
+            public int? DiagnosticoSnomed { get; set; }
+            public string? Informe { get; set; }
+            public string? DiagnosticoPrincipalVar { get; set; }
+        }
+        public class GuardarIndicacionesRequest
+        {
+            public int ConsultaId { get; set; }
+            public string JsonDetalle { get; set; }
+            public bool VistaMedico { get; set; }
+            public int? IdEnfermero { get; set; }
+            public int idPacinete { get; set; }
+            public int idPrestadorIndica { get; set; }
+            public int guardiaRegistroId { get; set; }
+            public int GuardiaSectorId { get; set; }
+            //public int idPacinete { get; set; }
+
+        }
+        public class GuardarSalidaRequest
+        {
+            public int GuardiaRegistroId { get; set; }
+            public int GuardiaSectorId { get; set; }
+            public int PrestadorId { get; set; }
+            public DateTime Fecha { get; set; }
+            public int TipoAltaID { get; set; }
+            public string Motivo { get; set; }
         }
 
     }
