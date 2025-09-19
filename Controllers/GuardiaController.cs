@@ -5,6 +5,7 @@ using System.Net;
 using Zismed_Apis.Data;
 using Zismed_Apis.Models;
 using Zismed_Apis.Models.Dto;
+using Zismed_Apis.Services;
 
 namespace Zismed_Apis.Controllers
 {
@@ -16,13 +17,15 @@ namespace Zismed_Apis.Controllers
         private readonly ApplicationDbContext _Db;
         protected ApiResponse _response;
         private readonly InstitucionesService _institucionesService;
+        private readonly PrestadoresService _prestadoresService;
 
-        public GuardiaController(ILogger<GuardiaController> logger, ApplicationDbContext Db, InstitucionesService institucionesService)
+        public GuardiaController(ILogger<GuardiaController> logger, ApplicationDbContext Db, InstitucionesService institucionesService, PrestadoresService prestadoresService)
         {
             _logger = logger;
             _Db = Db;
             _response = new();
             _institucionesService = institucionesService;
+            _prestadoresService = prestadoresService;
         }
 
         //Trae todos los pacientes anotados en un sector específico de la guardia
@@ -340,6 +343,14 @@ namespace Zismed_Apis.Controllers
                 var pacienteNombre = paciente.Nombre?.Trim();
                 var pacienteDocumento = paciente.Documento?.Trim();
                 var pacienteFechaNacimiento = paciente.FechadeNacimiento;
+                var pacienteObraSocialId = paciente.ObraSocialId;
+
+                //Busca la obra social del paciente
+                var pacienteObraSocial = await _Db.ObraSocial
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(o => o.ObraSocialId == pacienteObraSocialId);
+
+                var pacienteObraSocialNombre = pacienteObraSocial.Nombre.Trim() ?? "No poseé obra social";
 
                 // Optimización de consultas
                 var consultas = await _Db.ConsultasAmbulatorias
@@ -420,7 +431,7 @@ namespace Zismed_Apis.Controllers
                     Evolucion = c.Evolucion,
                     PacienteId = c.PacienteId,
                     ObraSocialId = c.ObraSocialId,
-                    NombreObraSocial = c.ObraSocial?.Nombre,
+                    NombreObraSocial = c.ObraSocial?.Nombre.Trim(),
                     TurnoID = c.TurnoId,
                     GuardiaRegistroID = c.GuardiaRegistroId,
                     CamaId = c.CamaId,
@@ -439,6 +450,7 @@ namespace Zismed_Apis.Controllers
                     pacienteNombre = pacienteNombre,
                     pacienteDocumento = pacienteDocumento,
                     pacienteFechaNacimiento = pacienteFechaNacimiento,
+                    pacienteObraSocialNombre = pacienteObraSocialNombre,
                     RegistroID = registroId,
                     InstitucionID = institucionId,
                     Result = resultDto
@@ -566,6 +578,315 @@ namespace Zismed_Apis.Controllers
             public string? Informe { get; set; }
             public string? DiagnosticoPrincipalVar { get; set; }
         }
-        
+
+        //Métodos para derivación iterna
+
+        [HttpGet("DerivacionInternaGet/{idGuardiaRegistro}/{UsusarioLogueadoId}")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> GetCreateData(int idGuardiaRegistro, string UsusarioLogueadoId)
+        {
+            try
+            {
+                var objGuardiaRegBd = await _Db.GuardiaRegistro
+                    .Include(gr => gr.GuardiaSector)
+                    .Include(gr => gr.GuardiaDerivacionInterna)
+                    .FirstOrDefaultAsync(a => a.GuardiaRegistroId == idGuardiaRegistro && !a.Anulado);
+
+                if (objGuardiaRegBd == null)
+                {
+                    return BadRequest(new { message = "GuardiaRegistro no encontrado o inválido." });
+                }
+
+                var sectoresDestino = await _Db.GuardiaSectoresDestino
+                    .Join(_Db.GuardiaSector,
+                        sd => sd.GuardiaSectorIddestino, // ← aquí el nombre correcto según la definición de la clase
+                        s => s.GuardiaSectorId,
+                        (sd, s) => new { sd, s })
+                    .Where(joined => joined.sd.GuardiaSectorIdorigen == objGuardiaRegBd.GuardiaSectorId &&
+                                     !joined.sd.Anulado && !joined.s.Anulado &&
+                                     objGuardiaRegBd.InstitucionId == joined.s.InstitucionId)
+                    .OrderBy(joined => joined.s.Nombre)
+                    .Select(joined => new
+                    {
+                        joined.s.GuardiaSectorId,
+                        joined.s.Nombre,
+                        joined.s.TieneCamas
+                    })
+                    .ToListAsync();
+
+                //var sectoresDestino = await GetSectoresGuardiaDestino(objGuardiaRegBd.GuardiaSectorId, objGuardiaRegBd.InstitucionId);
+
+
+                //Busca el nombre del sector actual
+                var GuardiaSectorId = objGuardiaRegBd.GuardiaSectorId;
+                var sector = await _Db.GuardiaSector
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(o => o.GuardiaSectorId == GuardiaSectorId);
+
+                var guardiaSectorNombre = sector.Nombre.Trim() ?? "No hay nmobre del sector";
+
+                //var usuario = User.Identity?.Name;
+                var usuario = UsusarioLogueadoId;
+                var idUsuario = await _Db.AspNetUsers
+                    .Where(u => u.UserName == usuario)
+                    .Select(u => u.Id)
+                    .FirstOrDefaultAsync();
+
+                var claimUsuario = await _Db.AspNetUserClaims
+                    .Where(c => c.UserId == idUsuario && c.ClaimType == "PrestadorID")
+                    .Select(c => c.ClaimValue)
+                    .FirstOrDefaultAsync();
+
+                var prestadorIdUsuarioActual = claimUsuario == null ? null : claimUsuario;
+
+                var prestadorId = claimUsuario == null || claimUsuario == "0" ? 0 : Convert.ToInt32(claimUsuario);
+
+                // Obtener prestadores usando el método del PrestadoresController
+                var loggerPrestadores = HttpContext.RequestServices.GetService(typeof(ILogger<PrestadoresController>)) as ILogger<PrestadoresController>;
+
+                var prestadoresController = new PrestadoresController(loggerPrestadores, _Db, _institucionesService);
+                var prestadoresResult = await prestadoresController.ListaPrestadores(
+                    objGuardiaRegBd.InstitucionId,
+                    prestadorId, // PrestadorID
+                    null, // Guardia
+                    null // Internacion
+                ) as OkObjectResult;
+
+                if (prestadoresResult == null || prestadoresResult.Value == null)
+                {
+                    return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Error al obtener la lista de prestadores." });
+                }
+
+                var prestadores = prestadoresResult.Value;
+
+                var response = new
+                {
+                    Titulo = objGuardiaRegBd.GuardiaSector?.Nombre.Trim() + " - Derivación al Hospital",
+                    GuardiaRegistroId = objGuardiaRegBd.GuardiaRegistroId,
+                    GuardiaSectorActualId = objGuardiaRegBd.GuardiaSectorId,
+                    GuardiaSectorActualNombre = guardiaSectorNombre,
+                    GuardiaSectorCodigo = objGuardiaRegBd.GuardiaSector?.Codigo,
+                    SectoresDestino = sectoresDestino,
+                    PrestadorIdUsuarioActual = prestadorIdUsuarioActual,
+                    Prestadores = prestadores,
+                    TieneCama = objGuardiaRegBd.GuardiaSector?.TieneCamas ?? false
+                };
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error al obtener datos para crear derivación interna.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Error interno del servidor." });
+            }
+        }
+
+        [HttpPost("create")]
+        [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> CreateDerivacionInterna(
+            [FromBody] GuardiaDerivacionInternaDto dto,
+            [FromQuery] int? derivaOtraCama,
+            [FromQuery] string usuario = "",
+            [FromQuery] int prestadorIdSeleccionado = 0)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new { message = "Datos inválidos." });
+            }
+
+            await using var transaction = await _Db.Database.BeginTransactionAsync();
+            try
+            {
+                var fechaAhora = DateTime.Now;
+
+                // Set prestador
+                if (dto.PrestadorId == 0)
+                    dto.PrestadorId = prestadorIdSeleccionado;
+
+                // Buscar GuardiaRegistro y su sector
+                var guardiaRegistro = await _Db.GuardiaRegistro
+                    .Include(gr => gr.GuardiaSector)
+                    .Include(gr => gr.GuardiaDerivacionInterna)
+                    .FirstOrDefaultAsync(g => g.GuardiaRegistroId == dto.GuardiaRegistroId && !g.Anulado);
+
+                if (guardiaRegistro == null)
+                    return BadRequest(new { message = "GuardiaRegistro no encontrado." });
+
+                // Obtener ID Institución del usuario
+                var idInstitucionUserStr = User?.Claims?.FirstOrDefault(c => c.Type == "IdInstitucion")?.Value;
+                if (string.IsNullOrEmpty(idInstitucionUserStr) && !string.IsNullOrEmpty(usuario))
+                {
+                    idInstitucionUserStr = await _Db.AspNetUserClaims
+                        .Where(c => c.ClaimType == "IdInstitucion" && c.User.UserName == usuario)
+                        .Select(c => c.ClaimValue)
+                        .FirstOrDefaultAsync();
+                }
+                var idInstitucionUser = int.TryParse(idInstitucionUserStr, out var idInst) ? idInst : 0;
+
+                // Validar indicaciones médicas si va a Enfermería y es institución 2
+                if (idInstitucionUser == 2)
+                {
+                    var indicacion = await _Db.MedicacionPaciente
+                        .FirstOrDefaultAsync(m => m.GuardiaRegistroId == dto.GuardiaRegistroId && !m.Anulado);
+
+                    var sectorDestinoNombre = await _Db.GuardiaSector
+                        .Where(s => s.GuardiaSectorId == dto.GuardiaSectorHastaId && !s.Anulado)
+                        .Select(s => s.Nombre.Trim())
+                        .FirstOrDefaultAsync();
+
+                    if (indicacion == null && sectorDestinoNombre != null &&
+                        (sectorDestinoNombre.Contains("Enfermeria", StringComparison.OrdinalIgnoreCase) ||
+                         sectorDestinoNombre.Contains("Enfermería", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        return BadRequest(new { message = "El paciente debe tener indicaciones médicas cargadas para poder derivarlo a enfermería." });
+                    }
+                }
+
+                // Validar cama si se eligió
+                if (dto.GuardiaCamaId.HasValue)
+                {
+                    var camaDisponible = await _Db.GuardiaCama
+                        .AnyAsync(c => c.GuardiaCamaId == dto.GuardiaCamaId && !c.Ocupada && !c.Anulado);
+
+                    if (!camaDisponible)
+                        return BadRequest(new { message = "La cama seleccionada no está disponible." });
+                }
+
+
+                //dto.PrestadorId = await prestadoresController.ListaPrestadores(guardiaRegistro.InstitucionId, dto.PrestadorId, null, null);
+                var prestador = await _prestadoresService.ListaPrestadores(guardiaRegistro.InstitucionId, dto.PrestadorId, null, null);
+                dto.PrestadorId = prestador.FirstOrDefault()?.Value ?? 0;
+                // Iniciar objeto de derivación
+                var derivacion = new GuardiaDerivacionInterna
+                {
+                    GuardiaRegistroId = dto.GuardiaRegistroId,
+                    GuardiaSectorDesdeId = dto.GuardiaSectorDesdeId,
+                    GuardiaSectorHastaId = dto.GuardiaSectorHastaId,
+                    GuardiaCamaId = dto.GuardiaCamaId,
+                    PrestadorId = dto.PrestadorId,
+                    Usuario = User?.Identity?.Name ?? usuario,
+                    FechaCrea = fechaAhora,
+                    Fecha = fechaAhora,
+                    Anulado = false
+                };
+
+                // Lógica de derivación
+                if (derivaOtraCama == 0)
+                {
+                    if (dto.GuardiaCamaId.HasValue)
+                    {
+                        // Ocupar cama nueva
+                        var cama = await _Db.GuardiaCama.FindAsync(dto.GuardiaCamaId);
+                        if (cama != null)
+                        {
+                            cama.Ocupada = true;
+                            cama.FechaModifica = fechaAhora;
+                            _Db.Update(cama);
+                        }
+                    }
+                    else if ((bool)!guardiaRegistro.GuardiaSector.TieneCamas)
+                    {
+                        // Sector sin camas: continuar sin asignar cama
+                        derivacion.GuardiaCamaId = null;
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "Debe seleccionar una cama para este sector." });
+                    }
+                }
+                else if (derivaOtraCama == 1 && guardiaRegistro.GuardiaSector.TieneCamas == true)
+                {
+                    // Liberar cama anterior
+                    var ultimaDerivacion = guardiaRegistro.GuardiaDerivacionInterna
+                        .Where(d => !d.Anulado && d.GuardiaCamaId.HasValue)
+                        .OrderByDescending(d => d.GuardiaDerivacionInternaId)
+                        .FirstOrDefault();
+
+                    if (ultimaDerivacion?.GuardiaCamaId != null)
+                    {
+                        var camaAnterior = await _Db.GuardiaCama.FindAsync(ultimaDerivacion.GuardiaCamaId);
+                        if (camaAnterior != null)
+                        {
+                            camaAnterior.Ocupada = false;
+                            camaAnterior.FechaModifica = fechaAhora;
+                            _Db.Update(camaAnterior);
+                        }
+                    }
+
+                    // Ocupar cama nueva
+                    if (dto.GuardiaCamaId.HasValue)
+                    {
+                        var camaNueva = await _Db.GuardiaCama.FindAsync(dto.GuardiaCamaId);
+                        if (camaNueva != null)
+                        {
+                            camaNueva.Ocupada = true;
+                            camaNueva.FechaModifica = fechaAhora;
+                            _Db.Update(camaNueva);
+                        }
+                    }
+                    else
+                    {
+                        return BadRequest(new { message = "Debe seleccionar una cama para este sector." });
+                    }
+                }
+                else if ((bool)!guardiaRegistro.GuardiaSector.TieneCamas)
+                {
+                    // Sector sin camas: continuar sin asignar cama
+                    derivacion.GuardiaCamaId = null;
+                }
+
+                // Guardar derivación
+                _Db.GuardiaDerivacionInterna.Add(derivacion);
+
+                // Actualizar sector actual en GuardiaRegistro
+                guardiaRegistro.GuardiaSectorId = derivacion.GuardiaSectorHastaId ?? guardiaRegistro.GuardiaSectorId;
+                guardiaRegistro.FechaModifica = fechaAhora;
+                _Db.GuardiaRegistro.Update(guardiaRegistro);
+
+                await _Db.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return Ok(new { message = "Derivación interna creada exitosamente." });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error al crear derivación interna.");
+                return StatusCode(500, new { message = "Error interno del servidor.", error = ex.Message });
+            }
+        }
+
+        [HttpGet("SectoresGuardiaDestino")]
+        public async Task<ActionResult<List<GuardiaRegistroView>>> GetSectoresGuardiaDestino(int GuardiaSectorID, int? InstitucionID)
+        {
+            return await _Db.GuardiaSectoresDestino
+                .Where(sd => sd.GuardiaSectorIdorigen == GuardiaSectorID && !sd.Anulado)
+                .Join(
+                    _Db.GuardiaSector.Where(s => !s.Anulado && (InstitucionID == s.InstitucionId || InstitucionID == null)),
+                    sd => sd.GuardiaSectorIddestino,
+                    s => s.GuardiaSectorId,
+                    (sd, s) => new GuardiaRegistroView
+                    {
+                        GuardiaSectorHastaID = s.GuardiaSectorId,
+                        Nombre = s.Nombre,
+                        TieneCamas = s.TieneCamas ?? false
+                    }
+                )
+                .OrderBy(x => x.Nombre)
+                .ToListAsync();
+        }
+
+        public class GuardiaRegistroView
+        {
+            public int GuardiaSectorHastaID { get; set; }
+
+            public string Nombre { get; set; }
+
+            public bool TieneCamas { get; set; } = false;
+
+        }
+
     }
 }

@@ -68,4 +68,6 @@ public partial class GuardiaRegistro
     public virtual TipoAltaIntenado? TipoAlta { get; set; }
 
     public virtual TipoCuracion? TipoCuracion { get; set; }
+    public virtual ICollection<GuardiaDerivacionInterna> GuardiaDerivacionInterna { get; set; }
+
 }

@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Zismed_Apis.Data;
+using Zismed_Apis.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers().AddNewtonsoftJson();
 builder.Services.AddScoped<InstitucionesService>();
+builder.Services.AddScoped<PrestadoresService>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
